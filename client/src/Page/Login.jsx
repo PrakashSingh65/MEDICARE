@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { useLogin } from "../api/authApi";
+import { loginUser } from "../api/authApi";
 import { setCredentials } from "../redux/authSlice";
 
 export default function Login() {
@@ -9,7 +9,7 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const loginMutation = useLogin();
+  const loginMutation = loginUser();
 
   const handleSubmit = async (event) => {
     event.preventDefault();
