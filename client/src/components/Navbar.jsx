@@ -1,15 +1,15 @@
 import React, { useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { useLogout, useCheckAuth } from "../api/authApi";
+import { logoutUser, checkAuthUser } from "../api/authApi";
 import { logout, setCredentials, selectCurrentUser } from "../redux/authSlice";
 
 const Navbar = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const user = useSelector(selectCurrentUser);
-  const { data: persistedUser, isError } = useCheckAuth();
-  const { mutate: logoutMutate, isLoading: isLoggingOut } = useLogout();
+  const { data: persistedUser, isError } = checkAuthUser();
+  const { mutate: logoutMutate, isLoading: isLoggingOut } = logoutUser();
 
   useEffect(() => {
     if (persistedUser) {

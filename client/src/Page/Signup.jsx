@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { useSignup } from "../api/authApi";
 import { setCredentials } from "../redux/authSlice";
+import { signupUser } from "../api/authApi";
 
 export default function Signup() {
   const [username, setUsername] = useState("");
@@ -11,7 +11,7 @@ export default function Signup() {
   const [image, setImage] = useState(null);
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const signupMutation = useSignup();
+  const signupMutation = signupUser();
 
   const handleSubmit = (event) => {
     event.preventDefault();
