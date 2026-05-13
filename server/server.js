@@ -21,7 +21,7 @@ app.use(fileUpload({
   abortOnLimit: true,
 }));
 
-app.use(userRouter);
+app.use("/api/v1/auth", userRouter);
 
 app.get("/", (req, res) => {
   res.send("Welcome to the Medicare API!");
