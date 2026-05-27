@@ -3,6 +3,7 @@ import App from "../App";
 import Home from "../Page/Home";
 import Login from "../Page/Login";
 import Signup from "../Page/Signup";
+import Contact from "../Page/Contact";
 import AdminDashboard from "../Page/Admin/AdminDashboard";
 import Doctorlist from "../Page/Admin/Doctorlist";
 import UsersList from "../Page/Admin/UsersList";
@@ -23,6 +24,10 @@ export const router = createBrowserRouter([
       {
         path: "signup",
         element: <Signup />,
+      },
+      {
+        path: "contact",
+        element: <Contact />,
       },
       {
         path: "admin",
