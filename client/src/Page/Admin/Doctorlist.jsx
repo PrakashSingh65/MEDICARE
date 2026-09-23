@@ -1,159 +1,169 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
-
-const doctors = [
-  {
-    name: "Dr. Priya Sharma",
-    specialty: "Cardiology",
-    clinic: "HeartCare Clinic",
-    location: "Bangalore",
-    experience: 12,
-    rating: 4.9,
-    patients: 124,
-  },
-  {
-    name: "Dr. Ankit Verma",
-    specialty: "General Practice",
-    clinic: "CityHealth Center",
-    location: "Mumbai",
-    experience: 8,
-    rating: 4.7,
-    patients: 98,
-  },
-  {
-    name: "Dr. Meera Singh",
-    specialty: "Pediatrics",
-    clinic: "Little Steps Clinic",
-    location: "Delhi",
-    experience: 10,
-    rating: 4.8,
-    patients: 76,
-  },
-  {
-    name: "Dr. Rohit Patel",
-    specialty: "Orthopedics",
-    clinic: "BoneCare Hospital",
-    location: "Chennai",
-    experience: 14,
-    rating: 4.6,
-    patients: 88,
-  },
-  {
-    name: "Dr. Leena Dutta",
-    specialty: "Dermatology",
-    clinic: "SkinWell Studio",
-    location: "Kolkata",
-    experience: 9,
-    rating: 4.7,
-    patients: 72,
-  },
-  {
-    name: "Dr. Aarav Joshi",
-    specialty: "Neurology",
-    clinic: "NeuroPoint Hospital",
-    location: "Pune",
-    experience: 15,
-    rating: 4.8,
-    patients: 109,
-  },
-  {
-    name: "Dr. Sneha Rao",
-    specialty: "Gynecology",
-    clinic: "MotherCare Clinic",
-    location: "Hyderabad",
-    experience: 11,
-    rating: 4.9,
-    patients: 95,
-  },
-  {
-    name: "Dr. Karan Singh",
-    specialty: "ENT",
-    clinic: "SoundHealth Center",
-    location: "Ahmedabad",
-    experience: 7,
-    rating: 4.6,
-    patients: 66,
-  },
-  {
-    name: "Dr. Nisha Kapoor",
-    specialty: "Ophthalmology",
-    clinic: "VisionCare Eye Hospital",
-    location: "Jaipur",
-    experience: 13,
-    rating: 4.8,
-    patients: 81,
-  },
-  {
-    name: "Dr. Vikram Singh",
-    specialty: "Endocrinology",
-    clinic: "Balance Health Clinic",
-    location: "Lucknow",
-    experience: 10,
-    rating: 4.7,
-    patients: 74,
-  },
-];
+import { Search, Filter, Stethoscope, Star, MapPin, Award, Eye, Calendar, Plus } from "lucide-react";
+import PanelLayout from "../../components/panels/PanelLayout";
+import DoctorHistoryModal from "../../components/panels/DoctorHistoryModal";
+import { getDoctors } from "../../data/mockData";
 
 export default function Doctorlist() {
-  return (
-    <main className="min-h-screen bg-slate-50 px-6 py-10 sm:px-10 lg:px-14">
-      <div className="mx-auto max-w-7xl space-y-8">
-        <section className="rounded-4xl border border-slate-200 bg-white p-8 shadow-sm">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <p className="text-sm uppercase tracking-[0.3em] text-sky-600">Doctor list</p>
-              <h1 className="mt-3 text-3xl font-semibold text-slate-950">Available practitioners</h1>
-              <p className="mt-3 max-w-2xl text-slate-600">
-                Demo doctor roster showing specialties, clinic locations, experience, ratings, and patient load.
-              </p>
-            </div>
-            <Link
-              to="/admin"
-              className="inline-flex items-center rounded-full border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
-            >
-              Back to dashboard
-            </Link>
-          </div>
-        </section>
+  const [doctors] = useState(getDoctors);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedSpecialty, setSelectedSpecialty] = useState("All");
+  const [selectedDoctor, setSelectedDoctor] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-        <section className="grid gap-6 lg:grid-cols-2 xl:grid-cols-3">
-          {doctors.map((doctor) => (
-            <article key={doctor.name} className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-              <div className="mb-4 flex items-start justify-between gap-4">
+  const specialties = ["All", ...new Set(doctors.map((d) => d.specialty))];
+
+  const filteredDoctors = doctors.filter((doc) => {
+    const matchesSearch =
+      doc.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      doc.clinic.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      doc.location.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSpecialty =
+      selectedSpecialty === "All" || doc.specialty === selectedSpecialty;
+    return matchesSearch && matchesSpecialty;
+  });
+
+  const handleOpenHistory = (doctor) => {
+    setSelectedDoctor(doctor);
+    setIsModalOpen(true);
+  };
+
+  return (
+    <PanelLayout
+      role="admin"
+      title="Doctors Directory & Clinical History"
+      subtitle="View all registered medical specialists, clinical credentials, ratings, and inspect full consultation histories."
+    >
+      <div className="space-y-6">
+        {/* Search & Filters */}
+        <div className="bg-white p-5 rounded-3xl border border-slate-200/80 shadow-xs flex flex-col md:flex-row items-center justify-between gap-4">
+          <div className="relative w-full md:w-96">
+            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Search doctor by name, clinic, or city..."
+              className="w-full pl-10 pr-4 py-2 rounded-2xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-sky-500 text-sm"
+            />
+          </div>
+
+          <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
+            <div className="flex items-center gap-2">
+              <Filter className="w-4 h-4 text-slate-400" />
+              <span className="text-xs text-slate-500 font-medium">Specialty:</span>
+              <select
+                value={selectedSpecialty}
+                onChange={(e) => setSelectedSpecialty(e.target.value)}
+                className="px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-sky-500"
+              >
+                {specialties.map((spec) => (
+                  <option key={spec} value={spec}>
+                    {spec}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <span className="text-xs font-semibold px-3 py-1.5 rounded-xl bg-slate-100 text-slate-600">
+              {filteredDoctors.length} Doctors Found
+            </span>
+          </div>
+        </div>
+
+        {/* Doctor Grid */}
+        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+          {filteredDoctors.map((doctor) => {
+            const historyCount = doctor.consultationHistory?.length || 0;
+            return (
+              <article
+                key={doctor.id || doctor.name}
+                className="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-xs hover:shadow-md transition flex flex-col justify-between"
+              >
                 <div>
-                  <h2 className="text-xl font-semibold text-slate-900">{doctor.name}</h2>
-                  <p className="mt-1 text-sm text-slate-500">{doctor.specialty}</p>
+                  <div className="flex items-start gap-4">
+                    <img
+                      src={
+                        doctor.avatar ||
+                        "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=300"
+                      }
+                      alt={doctor.name}
+                      className="w-16 h-16 rounded-2xl object-cover border border-slate-100 shadow-sm"
+                    />
+                    <div className="flex-1">
+                      <div className="flex items-start justify-between gap-1">
+                        <h2 className="text-lg font-bold text-slate-900 leading-snug">{doctor.name}</h2>
+                        <span className="flex items-center gap-1 text-xs font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full shrink-0">
+                          <Star className="w-3 h-3 fill-amber-500 text-amber-500" />
+                          {doctor.rating}
+                        </span>
+                      </div>
+                      <p className="text-xs font-semibold text-sky-600 mt-0.5">{doctor.specialty}</p>
+                      <p className="text-xs text-slate-400 mt-1 flex items-center gap-1">
+                        <MapPin className="w-3 h-3" />
+                        <span>{doctor.location}</span>
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="mt-5 space-y-2 text-xs text-slate-600 bg-slate-50 p-3.5 rounded-2xl border border-slate-100">
+                    <p className="flex justify-between">
+                      <span className="text-slate-400">Clinic / Hospital:</span>
+                      <span className="font-semibold text-slate-800 text-right">{doctor.clinic}</span>
+                    </p>
+                    <p className="flex justify-between">
+                      <span className="text-slate-400">Experience:</span>
+                      <span className="font-semibold text-slate-800">{doctor.experience} years</span>
+                    </p>
+                    <p className="flex justify-between">
+                      <span className="text-slate-400">Consultation Fee:</span>
+                      <span className="font-semibold text-emerald-600">{doctor.fee || "$75"}</span>
+                    </p>
+                    <p className="flex justify-between">
+                      <span className="text-slate-400">Recorded Consults:</span>
+                      <span className="font-semibold text-indigo-600">{historyCount} cases</span>
+                    </p>
+                  </div>
                 </div>
-                <span className="rounded-full bg-sky-100 px-3 py-1 text-sm font-semibold text-sky-700">
-                  {doctor.rating} ★
-                </span>
-              </div>
-              <div className="space-y-3 text-sm text-slate-600">
-                <p>
-                  <span className="font-semibold text-slate-900">Clinic:</span> {doctor.clinic}
-                </p>
-                <p>
-                  <span className="font-semibold text-slate-900">Location:</span> {doctor.location}
-                </p>
-                <p>
-                  <span className="font-semibold text-slate-900">Experience:</span> {doctor.experience} years
-                </p>
-                <p>
-                  <span className="font-semibold text-slate-900">Patients:</span> {doctor.patients}
-                </p>
-              </div>
-              <div className="mt-6 flex flex-wrap gap-2">
-                <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-slate-600">
-                  {doctor.specialty}
-                </span>
-                <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-slate-600">
-                  {doctor.location}
-                </span>
-              </div>
-            </article>
-          ))}
-        </section>
+
+                <div className="mt-5 pt-4 border-t border-slate-100 flex items-center justify-between gap-3">
+                  <span
+                    className={`text-[11px] font-semibold px-2.5 py-1 rounded-full ${
+                      doctor.status === "Available"
+                        ? "bg-emerald-100 text-emerald-800"
+                        : "bg-slate-100 text-slate-600"
+                    }`}
+                  >
+                    {doctor.status || "Available"}
+                  </span>
+                  <button
+                    onClick={() => handleOpenHistory(doctor)}
+                    className="px-4 py-2 rounded-xl bg-sky-50 hover:bg-sky-600 hover:text-white text-sky-700 text-xs font-bold transition flex items-center gap-1.5 shadow-xs"
+                  >
+                    <Eye className="w-3.5 h-3.5" />
+                    <span>View Doctor History</span>
+                  </button>
+                </div>
+              </article>
+            );
+          })}
+        </div>
+
+        {filteredDoctors.length === 0 && (
+          <div className="text-center py-12 bg-white rounded-3xl border border-slate-200 p-8">
+            <Stethoscope className="w-10 h-10 text-slate-300 mx-auto mb-2" />
+            <p className="font-bold text-slate-700">No doctors match your search.</p>
+            <p className="text-xs text-slate-400 mt-1">Try searching with a different name or specialty filter.</p>
+          </div>
+        )}
       </div>
-    </main>
+
+      {/* Doctor History Modal */}
+      <DoctorHistoryModal
+        doctor={selectedDoctor}
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+      />
+    </PanelLayout>
   );
 }
