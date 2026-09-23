@@ -13,6 +13,9 @@ import {
   Eye,
   Activity,
   ArrowRight,
+  Sparkles,
+  MapPin,
+  HeartPulse,
 } from "lucide-react";
 import PanelLayout from "../../components/panels/PanelLayout";
 import PrescriptionModal from "../../components/panels/PrescriptionModal";
@@ -63,34 +66,42 @@ export default function DoctorDashboard() {
   return (
     <PanelLayout
       role="doctor"
-      title={`Welcome back, ${currentDoctor.name}`}
-      subtitle="Manage your daily patient queue, clinical diagnoses, appointments, and digital prescriptions."
+      title={`Clinical Operations: ${currentDoctor.name}`}
+      subtitle="Supervise your scheduled consultations, examine patient medical charts, issue digital prescriptions, and record diagnoses."
     >
       <div className="space-y-8">
-        {/* Doctor Header Banner */}
-        <div className="rounded-3xl bg-gradient-to-r from-emerald-600 via-teal-600 to-slate-900 p-6 sm:p-8 text-white shadow-lg relative overflow-hidden">
-          <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+        {/* Doctor Identity Hero Banner */}
+        <div className="rounded-3xl bg-gradient-to-r from-emerald-800 via-teal-900 to-slate-950 p-6 sm:p-10 text-white shadow-xl relative overflow-hidden border border-emerald-700/40">
+          <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
             <div className="flex items-center gap-5">
-              <img
-                src={currentDoctor.avatar}
-                alt={currentDoctor.name}
-                className="w-20 h-20 rounded-2xl object-cover border-2 border-white shadow-md"
-              />
-              <div>
-                <span className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-white/20 text-emerald-100 text-xs font-semibold backdrop-blur-xs">
-                  Active Clinical Duty
-                </span>
-                <h2 className="text-2xl font-bold text-white mt-1">{currentDoctor.name}</h2>
-                <p className="text-emerald-100 text-xs sm:text-sm">
-                  {currentDoctor.specialty} • {currentDoctor.clinic}
-                </p>
-                <div className="flex items-center gap-3 mt-2 text-xs text-emerald-200">
-                  <span className="flex items-center gap-1 font-bold text-white">
-                    <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-                    {currentDoctor.rating} (120+ reviews)
+              <div className="relative">
+                <img
+                  src={currentDoctor.avatar}
+                  alt={currentDoctor.name}
+                  className="w-22 h-22 rounded-3xl object-cover border-2 border-white/90 shadow-lg"
+                />
+                <span className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-emerald-400 border-2 border-slate-900 animate-pulse"></span>
+              </div>
+
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <span className="px-3 py-0.5 rounded-full bg-white/15 text-emerald-200 text-xs font-bold backdrop-blur-md border border-white/10">
+                    On Duty Specialist
                   </span>
+                  <span className="text-xs text-emerald-300 font-semibold">• {currentDoctor.qualification}</span>
+                </div>
+                <h2 className="text-2xl sm:text-3xl font-black text-white">{currentDoctor.name}</h2>
+                <p className="text-emerald-100/90 text-xs sm:text-sm font-medium flex items-center gap-1.5">
+                  <Stethoscope className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>{currentDoctor.specialty}</span>
                   <span>•</span>
-                  <span>Fee: {currentDoctor.fee}</span>
+                  <span>{currentDoctor.clinic}</span>
+                </p>
+                <div className="flex items-center gap-3 pt-1 text-xs">
+                  <span className="flex items-center gap-1 font-bold text-amber-300 bg-black/20 px-2 py-0.5 rounded-lg">
+                    ★ {currentDoctor.rating} (120+ clinical reviews)
+                  </span>
+                  <span className="font-extrabold text-white">Fee: {currentDoctor.fee}</span>
                 </div>
               </div>
             </div>
@@ -98,138 +109,146 @@ export default function DoctorDashboard() {
             <div className="flex flex-wrap items-center gap-3">
               <button
                 onClick={() => setIsDoctorHistoryOpen(true)}
-                className="px-4 py-2.5 rounded-xl bg-white text-slate-900 hover:bg-emerald-50 text-xs font-bold shadow-md transition flex items-center gap-1.5"
+                className="px-5 py-3 rounded-2xl bg-white hover:bg-emerald-50 text-slate-950 text-xs sm:text-sm font-extrabold shadow-md transition flex items-center gap-2"
               >
                 <Eye className="w-4 h-4 text-emerald-600" />
-                <span>My Consultation History</span>
+                <span>My Case History</span>
               </button>
               <button
                 onClick={() => handleOpenPrescription(patients[0]?.name)}
-                className="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-semibold border border-white/20 backdrop-blur-xs transition flex items-center gap-1.5"
+                className="px-5 py-3 rounded-2xl bg-white/10 hover:bg-white/20 text-white text-xs sm:text-sm font-bold border border-white/20 backdrop-blur-md transition flex items-center gap-2"
               >
                 <FileText className="w-4 h-4" />
                 <span>Quick Prescription</span>
               </button>
             </div>
           </div>
-          <div className="absolute -right-8 -bottom-8 w-56 h-56 bg-white/5 rounded-full blur-2xl pointer-events-none" />
+          <div className="absolute -right-10 -bottom-10 w-72 h-72 bg-emerald-500/20 rounded-full blur-3xl pointer-events-none" />
         </div>
 
         {/* Doctor KPIs */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="bg-white p-5 rounded-3xl border border-slate-200/80 shadow-xs">
-            <div className="flex items-center justify-between text-slate-500 text-xs">
-              <span className="font-semibold uppercase tracking-wider">Today's Visits</span>
-              <span className="p-2 rounded-xl bg-emerald-50 text-emerald-600">
-                <Calendar className="w-4 h-4" />
+          <div className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-xs hover:shadow-md transition">
+            <div className="flex items-center justify-between text-xs">
+              <span className="font-extrabold uppercase tracking-wider text-slate-400">Today's Consultations</span>
+              <div className="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                <Calendar className="w-5 h-5" />
+              </div>
+            </div>
+            <div className="mt-4 flex items-baseline gap-2">
+              <span className="text-3xl font-black text-slate-900 tracking-tight">{todayAppointments.length}</span>
+              <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
+                2 Confirmed
               </span>
             </div>
-            <div className="mt-3 flex items-baseline gap-2">
-              <span className="text-2xl font-bold text-slate-900">{todayAppointments.length} Patients</span>
-            </div>
-            <p className="text-xs text-slate-500 mt-1">2 confirmed, 1 pending</p>
+            <p className="text-xs text-slate-400 mt-2 font-medium">Scheduled for today</p>
           </div>
 
-          <div className="bg-white p-5 rounded-3xl border border-slate-200/80 shadow-xs">
-            <div className="flex items-center justify-between text-slate-500 text-xs">
-              <span className="font-semibold uppercase tracking-wider">Total Treated Patients</span>
-              <span className="p-2 rounded-xl bg-sky-50 text-sky-600">
-                <Users className="w-4 h-4" />
+          <div className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-xs hover:shadow-md transition">
+            <div className="flex items-center justify-between text-xs">
+              <span className="font-extrabold uppercase tracking-wider text-slate-400">Total Patient Caseload</span>
+              <div className="w-10 h-10 rounded-2xl bg-teal-50 text-teal-600 flex items-center justify-center">
+                <Users className="w-5 h-5" />
+              </div>
+            </div>
+            <div className="mt-4 flex items-baseline gap-2">
+              <span className="text-3xl font-black text-slate-900 tracking-tight">{currentDoctor.patientsCount}</span>
+              <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
+                +12 this month
               </span>
             </div>
-            <div className="mt-3 flex items-baseline gap-2">
-              <span className="text-2xl font-bold text-slate-900">{currentDoctor.patientsCount}</span>
-              <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">+12 new</span>
-            </div>
-            <p className="text-xs text-slate-500 mt-1">Under your primary care</p>
+            <p className="text-xs text-slate-400 mt-2 font-medium">Patients treated</p>
           </div>
 
-          <div className="bg-white p-5 rounded-3xl border border-slate-200/80 shadow-xs">
-            <div className="flex items-center justify-between text-slate-500 text-xs">
-              <span className="font-semibold uppercase tracking-wider">Practice Earnings</span>
-              <span className="p-2 rounded-xl bg-purple-50 text-purple-600">
-                <DollarSign className="w-4 h-4" />
-              </span>
+          <div className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-xs hover:shadow-md transition">
+            <div className="flex items-center justify-between text-xs">
+              <span className="font-extrabold uppercase tracking-wider text-slate-400">Practice Earnings</span>
+              <div className="w-10 h-10 rounded-2xl bg-sky-50 text-sky-600 flex items-center justify-center">
+                <DollarSign className="w-5 h-5" />
+              </div>
             </div>
-            <div className="mt-3 flex items-baseline gap-2">
-              <span className="text-2xl font-bold text-slate-900">$8,450</span>
-              <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">+15%</span>
+            <div className="mt-4 flex items-baseline gap-2">
+              <span className="text-3xl font-black text-slate-900 tracking-tight">$8,450</span>
+              <span className="text-xs font-bold text-sky-600 bg-sky-50 px-2 py-0.5 rounded-full">+15% MoM</span>
             </div>
-            <p className="text-xs text-slate-500 mt-1">Collected this month</p>
+            <p className="text-xs text-slate-400 mt-2 font-medium">Earned this fiscal cycle</p>
           </div>
 
-          <div className="bg-white p-5 rounded-3xl border border-slate-200/80 shadow-xs">
-            <div className="flex items-center justify-between text-slate-500 text-xs">
-              <span className="font-semibold uppercase tracking-wider">Patient Satisfaction</span>
-              <span className="p-2 rounded-xl bg-amber-50 text-amber-600">
-                <Star className="w-4 h-4" />
-              </span>
+          <div className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-xs hover:shadow-md transition">
+            <div className="flex items-center justify-between text-xs">
+              <span className="font-extrabold uppercase tracking-wider text-slate-400">Clinical Satisfaction</span>
+              <div className="w-10 h-10 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center">
+                <Star className="w-5 h-5" />
+              </div>
             </div>
-            <div className="mt-3 flex items-baseline gap-2">
-              <span className="text-2xl font-bold text-slate-900">4.9 / 5.0</span>
+            <div className="mt-4 flex items-baseline gap-2">
+              <span className="text-3xl font-black text-slate-900 tracking-tight">4.9 / 5.0</span>
+              <span className="text-xs font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full">Top 5%</span>
             </div>
-            <p className="text-xs text-slate-500 mt-1">Top 5% in Cardiology</p>
+            <p className="text-xs text-slate-400 mt-2 font-medium">Cardiology peer rating</p>
           </div>
         </div>
 
-        {/* Today's Patient Schedule Queue */}
+        {/* Today's Queue Section */}
         <div className="bg-white rounded-3xl border border-slate-200/80 p-6 sm:p-8 shadow-xs space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
             <div>
-              <h3 className="text-lg font-bold text-slate-900">Today's Appointment Schedule</h3>
-              <p className="text-xs text-slate-500">Upcoming consultations, patient chief complaints, and actions</p>
+              <h3 className="text-xl font-extrabold text-slate-900">Today's Consultation Schedule</h3>
+              <p className="text-xs text-slate-400">Patient arrival queue, chief symptoms, and immediate actions</p>
             </div>
             <Link
               to="/doctor/appointments"
-              className="text-xs font-bold text-emerald-600 hover:text-emerald-700 flex items-center gap-1"
+              className="text-xs font-bold text-emerald-600 hover:text-emerald-700 flex items-center gap-1 group"
             >
-              <span>View Full Schedule ({appointments.length})</span>
-              <ArrowRight className="w-3.5 h-3.5" />
+              <span>Full Schedule ({appointments.length})</span>
+              <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
             </Link>
           </div>
 
-          <div className="divide-y divide-slate-100">
+          <div className="space-y-4">
             {todayAppointments.map((apt) => (
               <div
                 key={apt.id}
-                className="py-4 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-slate-50/70 p-3 rounded-2xl transition"
+                className="p-5 rounded-3xl border border-slate-100 bg-slate-50/60 hover:bg-white hover:border-emerald-200 hover:shadow-xs transition-all flex flex-col lg:flex-row lg:items-center justify-between gap-6"
               >
                 <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-800 font-bold flex items-center justify-center shrink-0">
+                  <div className="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-800 font-extrabold flex items-center justify-center shrink-0">
                     <Clock className="w-5 h-5 text-emerald-700" />
                   </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <p className="font-bold text-slate-900 text-sm">{apt.patientName}</p>
-                      <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2.5 flex-wrap">
+                      <p className="font-extrabold text-slate-900 text-base">{apt.patientName}</p>
+                      <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700">
                         {apt.time}
                       </span>
                       <span
-                        className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${
+                        className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full border ${
                           apt.status === "Confirmed"
-                            ? "bg-emerald-100 text-emerald-800"
+                            ? "bg-emerald-100 text-emerald-800 border-emerald-200"
                             : apt.status === "Completed"
-                            ? "bg-sky-100 text-sky-800"
-                            : "bg-amber-100 text-amber-800"
+                            ? "bg-sky-100 text-sky-800 border-sky-200"
+                            : "bg-amber-100 text-amber-800 border-amber-200"
                         }`}
                       >
                         {apt.status}
                       </span>
                     </div>
-                    <p className="text-xs text-slate-600 mt-1 font-medium">
-                      <span className="text-slate-400">Chief Complaint: </span>
+
+                    <p className="text-xs text-slate-600 font-medium">
+                      <span className="text-slate-400 font-normal">Reported Chief Complaint: </span>
                       {apt.symptoms}
                     </p>
-                    <p className="text-[11px] text-slate-400 mt-0.5">
-                      Type: {apt.type} • Consultation Date: {apt.date}
+
+                    <p className="text-[11px] text-slate-400">
+                      Visit Type: {apt.type} • Consultation Date: {apt.date}
                     </p>
                   </div>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2.5">
                   <button
                     onClick={() => handleOpenPatientHistory(apt.patientName)}
-                    className="px-3 py-1.5 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-100 text-xs font-semibold flex items-center gap-1 transition"
+                    className="px-4 py-2 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-100 text-xs font-bold flex items-center gap-1.5 transition"
                   >
                     <Eye className="w-3.5 h-3.5" />
                     <span>Patient History</span>
@@ -237,16 +256,16 @@ export default function DoctorDashboard() {
 
                   <button
                     onClick={() => handleOpenPrescription(apt.patientName)}
-                    className="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center gap-1 shadow-xs transition"
+                    className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm transition"
                   >
                     <FileText className="w-3.5 h-3.5" />
-                    <span>Prescribe / Complete</span>
+                    <span>Prescribe & Complete</span>
                   </button>
 
                   {apt.status === "Pending" && (
                     <button
                       onClick={() => handleStatusChange(apt.id, "Confirmed")}
-                      className="px-3 py-1.5 rounded-xl bg-sky-100 hover:bg-sky-200 text-sky-800 text-xs font-bold transition"
+                      className="px-3 py-2 rounded-xl bg-emerald-100 hover:bg-emerald-200 text-emerald-800 text-xs font-bold transition"
                     >
                       Accept
                     </button>
@@ -257,12 +276,12 @@ export default function DoctorDashboard() {
           </div>
         </div>
 
-        {/* Doctor's Consultation History preview */}
+        {/* Doctor's Consultation History Archive */}
         <div className="bg-white rounded-3xl border border-slate-200/80 p-6 sm:p-8 shadow-xs space-y-4">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between pb-3 border-b border-slate-100">
             <div>
-              <h3 className="text-lg font-bold text-slate-900">Your Recent Consultation History</h3>
-              <p className="text-xs text-slate-500">Past patient case logs and treatments recorded by you</p>
+              <h3 className="text-lg font-extrabold text-slate-900">Your Recent Consultation Archive</h3>
+              <p className="text-xs text-slate-400">Clinical summaries and treatments recorded by you</p>
             </div>
             <button
               onClick={() => setIsDoctorHistoryOpen(true)}
@@ -274,17 +293,17 @@ export default function DoctorDashboard() {
 
           <div className="space-y-3">
             {(currentDoctor.consultationHistory || []).map((h, i) => (
-              <div key={h.id || i} className="p-4 rounded-2xl bg-slate-50 border border-slate-100 space-y-1 text-xs">
+              <div key={h.id || i} className="p-4 rounded-2xl bg-slate-50 border border-slate-100 space-y-1.5 text-xs">
                 <div className="flex items-center justify-between">
                   <span className="font-bold text-slate-900 text-sm">{h.patientName}</span>
-                  <span className="text-slate-400">{h.date}</span>
+                  <span className="text-slate-400 font-medium">{h.date}</span>
                 </div>
                 <p className="text-slate-600">
-                  <span className="font-semibold text-slate-700">Diagnosis: </span>
+                  <span className="font-bold text-slate-700">Diagnosis: </span>
                   {h.diagnosis}
                 </p>
                 <p className="text-slate-600">
-                  <span className="font-semibold text-slate-700">Prescription: </span>
+                  <span className="font-bold text-slate-700">Prescription: </span>
                   {h.treatment}
                 </p>
               </div>

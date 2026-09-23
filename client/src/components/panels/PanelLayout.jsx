@@ -15,6 +15,10 @@ import {
   ChevronRight,
   Activity,
   ArrowUpRight,
+  HeartPulse,
+  Bell,
+  Sparkles,
+  LifeBuoy,
 } from "lucide-react";
 
 export default function PanelLayout({ role = "admin", title, subtitle, children }) {
@@ -30,12 +34,12 @@ export default function PanelLayout({ role = "admin", title, subtitle, children 
       { name: "Revenue & Analytics", path: "/admin/analytics", icon: Activity },
     ],
     doctor: [
-      { name: "Doctor Dashboard", path: "/doctor", icon: Activity },
+      { name: "Clinical Dashboard", path: "/doctor", icon: Activity },
       { name: "My Appointments", path: "/doctor/appointments", icon: Calendar },
-      { name: "Patient Records", path: "/doctor/patients", icon: Users },
+      { name: "Patient Charts", path: "/doctor/patients", icon: Users },
     ],
     patient: [
-      { name: "Patient Dashboard", path: "/patient", icon: Activity },
+      { name: "Wellness Dashboard", path: "/patient", icon: Activity },
       { name: "My Appointments", path: "/patient/appointments", icon: Calendar },
       { name: "Prescriptions & Meds", path: "/patient/prescriptions", icon: Pill },
       { name: "Medical History", path: "/patient/history", icon: FileText },
@@ -44,49 +48,68 @@ export default function PanelLayout({ role = "admin", title, subtitle, children 
 
   const navItems = navigationConfig[role] || navigationConfig.admin;
 
-  const roleStyles = {
+  const roleThemes = {
     admin: {
-      badgeBg: "bg-purple-100 text-purple-800 border-purple-200",
-      accentBg: "bg-sky-600 hover:bg-sky-700 text-white",
-      activeNav: "bg-sky-50 text-sky-700 border-sky-500 font-semibold",
-      title: "Admin Control Center",
+      accentGradient: "from-purple-600 via-indigo-600 to-slate-900",
+      activeBg: "bg-purple-50/80 text-purple-900 border-purple-600 font-bold shadow-xs",
+      activeIcon: "text-purple-600",
+      badge: "bg-purple-100 text-purple-800 border-purple-200",
+      iconBg: "bg-purple-600",
+      roleLabel: "Administrator Portal",
+      glowClass: "glow-purple",
     },
     doctor: {
-      badgeBg: "bg-emerald-100 text-emerald-800 border-emerald-200",
-      accentBg: "bg-emerald-600 hover:bg-emerald-700 text-white",
-      activeNav: "bg-emerald-50 text-emerald-700 border-emerald-500 font-semibold",
-      title: "Doctor Clinical Portal",
+      accentGradient: "from-emerald-600 via-teal-600 to-slate-900",
+      activeBg: "bg-emerald-50/80 text-emerald-900 border-emerald-600 font-bold shadow-xs",
+      activeIcon: "text-emerald-600",
+      badge: "bg-emerald-100 text-emerald-800 border-emerald-200",
+      iconBg: "bg-emerald-600",
+      roleLabel: "Doctor Clinical Portal",
+      glowClass: "glow-emerald",
     },
     patient: {
-      badgeBg: "bg-sky-100 text-sky-800 border-sky-200",
-      accentBg: "bg-sky-600 hover:bg-sky-700 text-white",
-      activeNav: "bg-sky-50 text-sky-700 border-sky-500 font-semibold",
-      title: "Patient Wellness Hub",
+      accentGradient: "from-sky-600 via-cyan-600 to-slate-900",
+      activeBg: "bg-sky-50/80 text-sky-900 border-sky-600 font-bold shadow-xs",
+      activeIcon: "text-sky-600",
+      badge: "bg-sky-100 text-sky-800 border-sky-200",
+      iconBg: "bg-sky-600",
+      roleLabel: "Patient Wellness Hub",
+      glowClass: "glow-sky",
     },
   };
 
-  const currentRoleStyle = roleStyles[role] || roleStyles.admin;
+  const theme = roleThemes[role] || roleThemes.admin;
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col">
-      {/* Role Switcher Toolbar */}
-      <div className="bg-slate-900 text-white px-4 sm:px-8 py-2.5 flex flex-wrap items-center justify-between gap-3 text-xs border-b border-slate-800">
-        <div className="flex items-center gap-2">
-          <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-          <span className="text-slate-400 font-medium">Active Mode:</span>
-          <span className="font-semibold uppercase tracking-wider text-white">
-            {role.toUpperCase()} PANEL
+    <div className="min-h-screen mesh-bg flex flex-col antialiased">
+      {/* Dynamic Sub-header Panel Switcher Strip */}
+      <div className="bg-slate-950 text-white px-4 sm:px-8 py-2 flex flex-wrap items-center justify-between gap-3 text-xs border-b border-slate-800/80">
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+            </span>
+            <span className="text-slate-400 font-medium">Workspace:</span>
+            <span className="font-extrabold uppercase tracking-wider text-white">
+              {theme.roleLabel}
+            </span>
+          </div>
+          <span className="hidden md:inline-block text-slate-600">•</span>
+          <span className="hidden md:inline-block text-slate-400 font-medium">
+            Medicare Health Cloud (Safe Sandbox)
           </span>
         </div>
+
         <div className="flex items-center gap-2">
-          <span className="text-slate-400 hidden sm:inline">Switch Panel:</span>
-          <div className="flex items-center bg-slate-800 p-0.5 rounded-lg border border-slate-700">
+          <span className="text-slate-400 font-medium hidden sm:inline">Switch Workspace:</span>
+          <div className="flex items-center bg-slate-900/90 p-1 rounded-xl border border-slate-800">
             <Link
               to="/admin"
-              className={`px-3 py-1 rounded-md transition font-medium flex items-center gap-1.5 ${
+              className={`px-3 py-1 rounded-lg transition font-bold flex items-center gap-1.5 ${
                 role === "admin"
-                  ? "bg-sky-600 text-white shadow-sm"
-                  : "text-slate-300 hover:text-white"
+                  ? "bg-purple-600 text-white shadow-xs"
+                  : "text-slate-400 hover:text-white"
               }`}
             >
               <ShieldCheck className="w-3.5 h-3.5" />
@@ -94,10 +117,10 @@ export default function PanelLayout({ role = "admin", title, subtitle, children 
             </Link>
             <Link
               to="/doctor"
-              className={`px-3 py-1 rounded-md transition font-medium flex items-center gap-1.5 ${
+              className={`px-3 py-1 rounded-lg transition font-bold flex items-center gap-1.5 ${
                 role === "doctor"
-                  ? "bg-emerald-600 text-white shadow-sm"
-                  : "text-slate-300 hover:text-white"
+                  ? "bg-emerald-600 text-white shadow-xs"
+                  : "text-slate-400 hover:text-white"
               }`}
             >
               <Stethoscope className="w-3.5 h-3.5" />
@@ -105,10 +128,10 @@ export default function PanelLayout({ role = "admin", title, subtitle, children 
             </Link>
             <Link
               to="/patient"
-              className={`px-3 py-1 rounded-md transition font-medium flex items-center gap-1.5 ${
+              className={`px-3 py-1 rounded-lg transition font-bold flex items-center gap-1.5 ${
                 role === "patient"
-                  ? "bg-sky-600 text-white shadow-sm"
-                  : "text-slate-300 hover:text-white"
+                  ? "bg-sky-600 text-white shadow-xs"
+                  : "text-slate-400 hover:text-white"
               }`}
             >
               <User className="w-3.5 h-3.5" />
@@ -119,23 +142,30 @@ export default function PanelLayout({ role = "admin", title, subtitle, children 
       </div>
 
       <div className="flex-1 flex flex-col lg:flex-row">
-        {/* Sidebar for Desktop */}
-        <aside className="hidden lg:flex flex-col w-64 border-r border-slate-200 bg-white p-5 space-y-6">
-          <div className="pb-4 border-b border-slate-100">
+        {/* Aesthetic Desktop Sidebar */}
+        <aside className="hidden lg:flex flex-col w-68 border-r border-slate-200/80 bg-white/90 backdrop-blur-md p-5 space-y-6">
+          <div className="p-4 rounded-3xl bg-slate-50 border border-slate-200/80 space-y-3">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-sky-600 text-white flex items-center justify-center font-bold text-lg shadow-sm">
-                M+
+              <div
+                className={`w-11 h-11 rounded-2xl ${theme.iconBg} text-white flex items-center justify-center font-black text-lg shadow-md`}
+              >
+                {role === "admin" ? "A" : role === "doctor" ? "Dr" : "Pt"}
               </div>
-              <div>
-                <p className="font-semibold text-slate-900 text-sm leading-tight">MEDICARE</p>
-                <p className="text-xs text-slate-500 capitalize">{role} Workspace</p>
+              <div className="overflow-hidden">
+                <p className="font-extrabold text-slate-900 text-sm leading-tight truncate">
+                  {theme.roleLabel}
+                </p>
+                <p className="text-[11px] text-slate-500 font-semibold flex items-center gap-1 mt-0.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                  <span>Verified Session</span>
+                </p>
               </div>
             </div>
           </div>
 
-          <nav className="flex-1 space-y-1">
-            <p className="text-[11px] uppercase tracking-wider text-slate-400 font-semibold px-3 mb-2">
-              Menu Navigation
+          <nav className="flex-1 space-y-1.5">
+            <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold px-3 mb-2">
+              Navigation Menu
             </p>
             {navItems.map((item) => {
               const Icon = item.icon;
@@ -144,60 +174,68 @@ export default function PanelLayout({ role = "admin", title, subtitle, children 
                 <Link
                   key={item.path}
                   to={item.path}
-                  className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-medium transition ${
+                  className={`flex items-center justify-between px-3.5 py-3 rounded-2xl text-xs font-bold transition-all duration-200 ${
                     isActive
-                      ? `${currentRoleStyle.activeNav} border-l-4`
-                      : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                      ? `${theme.activeBg} border-l-4`
+                      : "text-slate-600 hover:bg-slate-100/80 hover:text-slate-900"
                   }`}
                 >
                   <div className="flex items-center gap-3">
-                    <Icon className={`w-4 h-4 ${isActive ? "text-sky-600" : "text-slate-400"}`} />
+                    <Icon className={`w-4 h-4 ${isActive ? theme.activeIcon : "text-slate-400"}`} />
                     <span>{item.name}</span>
                   </div>
-                  {isActive && <ChevronRight className="w-4 h-4 text-sky-600" />}
+                  {isActive ? (
+                    <ChevronRight className={`w-4 h-4 ${theme.activeIcon}`} />
+                  ) : null}
                 </Link>
               );
             })}
           </nav>
 
-          {/* Quick Support / Status Card */}
-          <div className="rounded-2xl bg-gradient-to-br from-slate-900 to-slate-800 text-white p-4 space-y-2 text-xs shadow-md">
+          {/* Clinical Live Metrics Card */}
+          <div className="rounded-3xl bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 text-white p-5 space-y-3 text-xs shadow-xl relative overflow-hidden">
             <div className="flex items-center justify-between">
-              <span className="font-medium text-slate-300">Live Services</span>
-              <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
+              <span className="font-bold text-sky-400 flex items-center gap-1.5">
+                <HeartPulse className="w-3.5 h-3.5" />
+                Live Cloud Sync
+              </span>
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
             </div>
-            <p className="text-slate-200 font-semibold">24/7 Support Hotline</p>
-            <p className="text-slate-400 text-[11px]">Direct emergency & consultation dispatch available.</p>
+            <p className="text-slate-200 font-bold text-sm">24/7 Clinical Network</p>
+            <p className="text-slate-400 text-[11px] leading-relaxed">
+              Instant appointment notifications & pharmacy stock alerts active.
+            </p>
             <Link
               to="/contact"
-              className="mt-2 inline-flex items-center gap-1 text-sky-400 hover:text-sky-300 font-medium text-[11px]"
+              className="inline-flex items-center gap-1.5 text-xs font-bold text-sky-300 hover:text-white transition pt-1"
             >
-              <span>Contact Desk</span>
-              <ArrowUpRight className="w-3 h-3" />
+              <span>Emergency Desk</span>
+              <ArrowUpRight className="w-3.5 h-3.5" />
             </Link>
+            <div className="absolute -bottom-6 -right-6 w-24 h-24 bg-sky-500/10 rounded-full blur-xl pointer-events-none" />
           </div>
         </aside>
 
         {/* Mobile Header Bar */}
-        <div className="lg:hidden bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between">
+        <div className="lg:hidden glass-nav border-b border-slate-200/80 px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={() => setMobileOpen(!mobileOpen)}
-              className="p-2 rounded-lg text-slate-600 hover:bg-slate-100"
+              className="p-2 rounded-xl text-slate-700 hover:bg-slate-100 transition"
             >
               {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
-            <span className="font-semibold text-slate-900 text-sm">{title || currentRoleStyle.title}</span>
+            <span className="font-extrabold text-slate-900 text-sm">{title || theme.roleLabel}</span>
           </div>
-          <span className={`text-[11px] font-semibold px-2.5 py-0.5 rounded-full border ${currentRoleStyle.badgeBg}`}>
+          <span className={`text-[10px] font-bold px-3 py-1 rounded-full border ${theme.badge}`}>
             {role.toUpperCase()}
           </span>
         </div>
 
-        {/* Mobile Dropdown Nav */}
+        {/* Mobile Navigation Dropdown */}
         {mobileOpen && (
-          <div className="lg:hidden bg-white border-b border-slate-200 p-4 space-y-1 shadow-lg animate-fadeIn">
+          <div className="lg:hidden bg-white border-b border-slate-200 p-4 space-y-1.5 shadow-xl animate-fadeIn">
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = location.pathname === item.path;
@@ -206,9 +244,9 @@ export default function PanelLayout({ role = "admin", title, subtitle, children 
                   key={item.path}
                   to={item.path}
                   onClick={() => setMobileOpen(false)}
-                  className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-medium ${
+                  className={`flex items-center justify-between px-4 py-3 rounded-2xl text-xs font-bold ${
                     isActive
-                      ? `${currentRoleStyle.activeNav} border-l-4`
+                      ? `${theme.activeBg} border-l-4`
                       : "text-slate-600 hover:bg-slate-50"
                   }`}
                 >
@@ -223,25 +261,30 @@ export default function PanelLayout({ role = "admin", title, subtitle, children 
           </div>
         )}
 
-        {/* Main Content Area */}
-        <main className="flex-1 p-4 sm:p-8 lg:p-10 max-w-7xl mx-auto w-full">
+        {/* Main Content Workspace */}
+        <main className="flex-1 p-4 sm:p-8 lg:p-10 max-w-7xl mx-auto w-full space-y-6">
           {/* Header Banner */}
           {(title || subtitle) && (
-            <div className="mb-8">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="bg-white/80 backdrop-blur-xs p-6 sm:p-8 rounded-3xl border border-slate-200/80 shadow-xs relative overflow-hidden">
+              <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                  <div className="flex items-center gap-2.5">
-                    <span className={`text-xs uppercase font-bold tracking-wider px-2.5 py-1 rounded-full border ${currentRoleStyle.badgeBg}`}>
-                      {role} panel
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className={`text-[10px] uppercase font-extrabold tracking-wider px-2.5 py-0.5 rounded-full border ${theme.badge}`}>
+                      {role} Portal
                     </span>
-                    <span className="text-slate-400 text-xs">• Medicare System</span>
+                    <span className="text-slate-400 text-xs">• Verified Clinical System</span>
                   </div>
-                  <h1 className="mt-2 text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
+                  <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
                     {title}
                   </h1>
-                  {subtitle && <p className="mt-1 text-sm text-slate-600 max-w-2xl">{subtitle}</p>}
+                  {subtitle && (
+                    <p className="mt-1.5 text-xs sm:text-sm text-slate-500 max-w-3xl leading-relaxed">
+                      {subtitle}
+                    </p>
+                  )}
                 </div>
               </div>
+              <div className="absolute top-0 right-0 w-64 h-full bg-gradient-to-l from-slate-100/50 to-transparent pointer-events-none" />
             </div>
           )}
 
