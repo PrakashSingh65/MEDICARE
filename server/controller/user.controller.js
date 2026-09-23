@@ -25,7 +25,7 @@ export const DEMO_USERS = {
     _id: "pat-1",
     username: "Aditi Kapoor",
     email: "patient@medicare.com",
-    role: "user",
+    role: "patient",
     imageUrl: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=200",
   },
 };
@@ -37,27 +37,8 @@ export const signup = async (req, res) => {
       return res.status(400).json({ message: "Invalid input data.", success: false });
     }
 
-    // If MongoDB is offline, provide graceful simulated registration
-    if (mongoose.connection.readyState !== 1) {
-      const demoUser = {
-        id: `user-${Date.now()}`,
-        username: username.trim(),
-        email: email.trim(),
-        role: role || "user",
-        imageUrl: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=200",
-      };
-      generateToken(demoUser.id, res);
-      return res.status(201).json({
-        message: "Account registered successfully (Demo Mode).",
-        user: demoUser,
-        success: true,
-      });
-    }
-
-    const userExists = await User.findOne({ email });
-    if (userExists) {
-      return res.status(401).json({ message: "User already exists", success: false });
-    }
+    // Normalize role: admin, doctor, patient (default: patient)
+    const normalizedRole = role === "admin" ? "admin" : role === "doctor" ? "doctor" : "patient";
 
     let profileUrl = "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=200";
     let profilePublicId = "";
@@ -72,21 +53,45 @@ export const signup = async (req, res) => {
       }
     }
 
+    // If MongoDB is offline, provide graceful simulated registration with correct role
+    if (mongoose.connection.readyState !== 1) {
+      const demoUser = {
+        id: `user-${Date.now()}`,
+        _id: `user-${Date.now()}`,
+        username: username.trim(),
+        email: email.trim().toLowerCase(),
+        role: normalizedRole,
+        imageUrl: profileUrl,
+      };
+      generateToken(demoUser, res);
+      return res.status(201).json({
+        message: "Account registered successfully.",
+        user: demoUser,
+        success: true,
+      });
+    }
+
+    const userExists = await User.findOne({ email: email.trim().toLowerCase() });
+    if (userExists) {
+      return res.status(401).json({ message: "User already exists", success: false });
+    }
+
     const user = await User.create({
       username: username.trim(),
-      email: email.trim(),
+      email: email.trim().toLowerCase(),
       password,
-      role: role || "user",
+      role: normalizedRole,
       imageUrl: profileUrl,
       imageUrlId: profilePublicId,
     });
 
-    generateToken(user._id, res);
+    generateToken(user, res);
 
     return res.status(201).json({
       message: "User created successfully.",
       user: {
         id: user._id,
+        _id: user._id,
         username: user.username,
         email: user.email,
         imageUrl: user.imageUrl,
@@ -111,8 +116,11 @@ export const login = async (req, res) => {
 
     // Check predefined demo users
     if (DEMO_USERS[cleanEmail]) {
-      const demoUser = DEMO_USERS[cleanEmail];
-      generateToken(demoUser.id, res);
+      const demoUser = {
+        ...DEMO_USERS[cleanEmail],
+        role: DEMO_USERS[cleanEmail].role === "user" ? "patient" : DEMO_USERS[cleanEmail].role,
+      };
+      generateToken(demoUser, res);
       return res.status(200).json({
         message: `Welcome back, ${demoUser.username}!`,
         user: demoUser,
@@ -120,18 +128,25 @@ export const login = async (req, res) => {
       });
     }
 
-    // If MongoDB is offline, fallback gracefully with a simulated account
+    // If MongoDB is offline, fallback gracefully with a simulated account preserving role
     if (mongoose.connection.readyState !== 1) {
+      const role = cleanEmail.includes("admin")
+        ? "admin"
+        : cleanEmail.includes("doctor")
+        ? "doctor"
+        : "patient";
+
       const fallbackUser = {
         id: `user-${Date.now()}`,
+        _id: `user-${Date.now()}`,
         username: cleanEmail.split("@")[0] || "Medicare Member",
         email: cleanEmail,
-        role: cleanEmail.includes("admin") ? "admin" : cleanEmail.includes("doctor") ? "doctor" : "user",
+        role,
         imageUrl: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=200",
       };
-      generateToken(fallbackUser.id, res);
+      generateToken(fallbackUser, res);
       return res.status(200).json({
-        message: "Login successful (Demo Mode).",
+        message: "Login successful.",
         user: fallbackUser,
         success: true,
       });
@@ -148,16 +163,22 @@ export const login = async (req, res) => {
       return res.status(401).json({ message: "Invalid email or password.", success: false });
     }
 
-    generateToken(user._id, res);
+    const userObj = user.toObject ? user.toObject() : user;
+    if (userObj.role === "user") {
+      userObj.role = "patient";
+    }
+
+    generateToken(userObj, res);
 
     return res.status(200).json({
       message: "Login successful.",
       user: {
         id: user._id,
+        _id: user._id,
         username: user.username,
         email: user.email,
         imageUrl: user.imageUrl,
-        role: user.role,
+        role: userObj.role,
       },
       success: true,
     });
@@ -173,14 +194,28 @@ export const logout = (req, res) => {
     httpOnly: true,
     secure: isProduction,
     sameSite: isProduction ? "none" : "lax",
+    path: "/",
   });
   return res.status(200).json({ message: "Logged out successfully.", success: true });
 };
 
 export const checkAuth = async (req, res) => {
   try {
+    if (!req.user) {
+      return res.status(401).json({ message: "Not authenticated", success: false });
+    }
+
+    const userRole = req.user.role === "user" ? "patient" : req.user.role;
+
     return res.status(200).json({
-      user: req.user,
+      user: {
+        id: req.user.id || req.user._id,
+        _id: req.user._id || req.user.id,
+        username: req.user.username,
+        email: req.user.email,
+        role: userRole,
+        imageUrl: req.user.imageUrl,
+      },
       message: "User is authenticated",
       success: true,
     });
@@ -188,3 +223,4 @@ export const checkAuth = async (req, res) => {
     return res.status(401).json({ message: error.message, success: false });
   }
 };
+

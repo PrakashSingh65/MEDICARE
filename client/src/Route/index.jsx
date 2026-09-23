@@ -23,6 +23,8 @@ import PatientAppointments from "../Page/Patient/PatientAppointments";
 import PatientPrescriptions from "../Page/Patient/PatientPrescriptions";
 import PatientMedicalHistory from "../Page/Patient/PatientMedicalHistory";
 
+import ProtectedRoute from "../components/ProtectedRoute";
+
 export const router = createBrowserRouter([
   {
     path: "/",
@@ -45,62 +47,114 @@ export const router = createBrowserRouter([
         element: <Contact />,
       },
 
-      // Admin Panel
+      // Admin Panel (Protected: Admin Only)
       {
         path: "admin",
-        element: <AdminDashboard />,
+        element: (
+          <ProtectedRoute allowedRoles={["admin"]}>
+            <AdminDashboard />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "admin/doctors",
-        element: <Doctorlist />,
+        element: (
+          <ProtectedRoute allowedRoles={["admin"]}>
+            <Doctorlist />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "admin/patients",
-        element: <UsersList />,
+        element: (
+          <ProtectedRoute allowedRoles={["admin"]}>
+            <UsersList />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "admin/users",
-        element: <UsersList />,
+        element: (
+          <ProtectedRoute allowedRoles={["admin"]}>
+            <UsersList />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "admin/medicines",
-        element: <MedicineList />,
+        element: (
+          <ProtectedRoute allowedRoles={["admin"]}>
+            <MedicineList />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "admin/analytics",
-        element: <RevenueGrowth />,
+        element: (
+          <ProtectedRoute allowedRoles={["admin"]}>
+            <RevenueGrowth />
+          </ProtectedRoute>
+        ),
       },
 
-      // Doctor Panel
+      // Doctor Panel (Protected: Doctor & Admin)
       {
         path: "doctor",
-        element: <DoctorDashboard />,
+        element: (
+          <ProtectedRoute allowedRoles={["doctor", "admin"]}>
+            <DoctorDashboard />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "doctor/appointments",
-        element: <DoctorAppointments />,
+        element: (
+          <ProtectedRoute allowedRoles={["doctor", "admin"]}>
+            <DoctorAppointments />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "doctor/patients",
-        element: <DoctorPatients />,
+        element: (
+          <ProtectedRoute allowedRoles={["doctor", "admin"]}>
+            <DoctorPatients />
+          </ProtectedRoute>
+        ),
       },
 
-      // Patient Panel
+      // Patient Panel (Protected: Patient & Admin)
       {
         path: "patient",
-        element: <PatientDashboard />,
+        element: (
+          <ProtectedRoute allowedRoles={["patient", "admin"]}>
+            <PatientDashboard />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "patient/appointments",
-        element: <PatientAppointments />,
+        element: (
+          <ProtectedRoute allowedRoles={["patient", "admin"]}>
+            <PatientAppointments />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "patient/prescriptions",
-        element: <PatientPrescriptions />,
+        element: (
+          <ProtectedRoute allowedRoles={["patient", "admin"]}>
+            <PatientPrescriptions />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "patient/history",
-        element: <PatientMedicalHistory />,
+        element: (
+          <ProtectedRoute allowedRoles={["patient", "admin"]}>
+            <PatientMedicalHistory />
+          </ProtectedRoute>
+        ),
       },
     ],
   },

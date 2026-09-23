@@ -25,13 +25,18 @@ export const checkAuthUser = async () => {
   return response.data;
 };
 
+export const getMeUser = async () => {
+  const response = await axiosClient.get("/api/v1/auth/me");
+  return response.data;
+};
+
 export const useSignup = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: signupUser,
     onSuccess: () => {
-      queryClient.invalidateQueries(["auth"]);
+      queryClient.invalidateQueries({ queryKey: ["auth"] });
     },
   });
 };
@@ -42,7 +47,7 @@ export const useLogin = () => {
   return useMutation({
     mutationFn: loginUser,
     onSuccess: () => {
-      queryClient.invalidateQueries(["auth"]);
+      queryClient.invalidateQueries({ queryKey: ["auth"] });
     },
   });
 };
@@ -53,7 +58,8 @@ export const useLogout = () => {
   return useMutation({
     mutationFn: logoutUser,
     onSuccess: () => {
-      queryClient.invalidateQueries(["auth"]);
+      queryClient.setQueryData(["auth"], null);
+      queryClient.invalidateQueries({ queryKey: ["auth"] });
     },
   });
 };

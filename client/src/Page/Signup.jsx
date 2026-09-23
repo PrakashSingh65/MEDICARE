@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
+import { ShieldCheck, Stethoscope, User, Sparkles } from "lucide-react";
 import { setCredentials } from "../redux/authSlice";
 import { useSignup } from "../api/authApi";
 
@@ -8,6 +9,7 @@ export default function Signup() {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [role, setRole] = useState("patient");
   const [image, setImage] = useState(null);
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -16,36 +18,100 @@ export default function Signup() {
   const handleSubmit = (event) => {
     event.preventDefault();
 
-    if (!image) {
-      return;
-    }
-
     const formData = new FormData();
     formData.append("username", username);
     formData.append("email", email);
     formData.append("password", password);
-    formData.append("image", image);
+    formData.append("role", role);
+    if (image) {
+      formData.append("image", image);
+    }
 
     signupMutation.mutate(formData, {
       onSuccess: (data) => {
-        dispatch(setCredentials(data.user));
-        navigate("/");
+        if (data?.user) {
+          dispatch(setCredentials(data.user));
+          if (data.user.role === "admin") {
+            navigate("/admin");
+          } else if (data.user.role === "doctor") {
+            navigate("/doctor");
+          } else {
+            navigate("/patient");
+          }
+        } else {
+          navigate("/login");
+        }
       },
     });
   };
 
   return (
     <main className="min-h-screen bg-slate-50 px-6 py-14 sm:px-10">
-      <section className="mx-auto max-w-lg rounded-3xl bg-white p-10 shadow-xl shadow-slate-200">
-        <div className="mb-8 text-center">
-          <p className="text-sm uppercase tracking-[0.3em] text-sky-600">Create account</p>
-          <h1 className="mt-4 text-3xl font-semibold text-slate-900">Get started with MEDICARE</h1>
-          <p className="mt-3 text-sm text-slate-500">
-            Join now to manage your healthcare appointments and resources in one place.
+      <section className="mx-auto max-w-lg rounded-3xl bg-white p-8 sm:p-10 shadow-xl shadow-slate-200 border border-slate-100">
+        <div className="mb-6 text-center">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-sky-50 text-sky-700 text-xs font-bold uppercase tracking-wider mb-3">
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>Registration</span>
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900">Create Account</h1>
+          <p className="mt-2 text-xs text-slate-500">
+            Join MEDICARE to access your clinical dashboard or patient portal.
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-5">
+          {/* Role Selection */}
+          <div>
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">
+              Select Your Role
+            </label>
+            <div className="grid grid-cols-3 gap-2">
+              <button
+                type="button"
+                onClick={() => setRole("patient")}
+                className={`p-3 rounded-2xl border text-center transition flex flex-col items-center gap-1.5 ${
+                  role === "patient"
+                    ? "border-sky-500 bg-sky-50/80 text-sky-800 ring-2 ring-sky-200 shadow-sm"
+                    : "border-slate-200 bg-slate-50 text-slate-600 hover:border-slate-300 hover:bg-white"
+                }`}
+              >
+                <div className={`p-2 rounded-xl ${role === "patient" ? "bg-sky-500 text-white" : "bg-slate-200 text-slate-600"}`}>
+                  <User className="w-4 h-4" />
+                </div>
+                <span className="text-xs font-bold">Patient</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setRole("doctor")}
+                className={`p-3 rounded-2xl border text-center transition flex flex-col items-center gap-1.5 ${
+                  role === "doctor"
+                    ? "border-emerald-500 bg-emerald-50/80 text-emerald-800 ring-2 ring-emerald-200 shadow-sm"
+                    : "border-slate-200 bg-slate-50 text-slate-600 hover:border-slate-300 hover:bg-white"
+                }`}
+              >
+                <div className={`p-2 rounded-xl ${role === "doctor" ? "bg-emerald-500 text-white" : "bg-slate-200 text-slate-600"}`}>
+                  <Stethoscope className="w-4 h-4" />
+                </div>
+                <span className="text-xs font-bold">Doctor</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setRole("admin")}
+                className={`p-3 rounded-2xl border text-center transition flex flex-col items-center gap-1.5 ${
+                  role === "admin"
+                    ? "border-purple-500 bg-purple-50/80 text-purple-800 ring-2 ring-purple-200 shadow-sm"
+                    : "border-slate-200 bg-slate-50 text-slate-600 hover:border-slate-300 hover:bg-white"
+                }`}
+              >
+                <div className={`p-2 rounded-xl ${role === "admin" ? "bg-purple-600 text-white" : "bg-slate-200 text-slate-600"}`}>
+                  <ShieldCheck className="w-4 h-4" />
+                </div>
+                <span className="text-xs font-bold">Admin</span>
+              </button>
+            </div>
+          </div>
           <label className="block">
             <span className="text-sm font-medium text-slate-700">Full name</span>
             <input

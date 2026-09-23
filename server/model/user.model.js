@@ -32,8 +32,8 @@ const userSchema = new Schema({
     },
     role: {
         type: String,
-        enum: ['user', 'admin', 'doctor'],
-        default: 'user',
+        enum: ['admin', 'doctor', 'patient', 'user'],
+        default: 'patient',
     }
 },{ timestamps: true });
 

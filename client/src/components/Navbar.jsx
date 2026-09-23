@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -10,6 +10,8 @@ import {
   Sparkles,
   PhoneCall,
   Home,
+  Menu,
+  X,
   ChevronRight,
 } from "lucide-react";
 import { useLogout, useCheckAuth } from "../api/authApi";
@@ -19,6 +21,7 @@ const Navbar = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const user = useSelector(selectCurrentUser);
   const { data: persistedUser } = useCheckAuth();
   const { mutate: logoutMutate, isPending: isLoggingOut } = useLogout();
@@ -44,6 +47,8 @@ const Navbar = () => {
     if (path === "/") return location.pathname === "/";
     return location.pathname.startsWith(path);
   };
+
+  const userRole = user?.role === "user" ? "patient" : (user?.role || "patient");
 
   return (
     <header className="sticky top-0 z-40 glass-nav border-b border-slate-200/80 px-4 sm:px-8 py-3 transition-all duration-200 shadow-xs">
@@ -73,7 +78,7 @@ const Navbar = () => {
           </div>
         </Link>
 
-        {/* Central Role Selector Pills */}
+        {/* Central Role Selector Navigation Pills */}
         <nav className="hidden md:flex items-center p-1.5 rounded-2xl bg-slate-100/90 border border-slate-200/80 shadow-xs">
           <Link
             to="/"
@@ -141,16 +146,41 @@ const Navbar = () => {
           {user ? (
             <div className="flex items-center gap-2">
               <div className="flex items-center gap-2.5 pl-3 pr-2 py-1.5 rounded-2xl bg-white border border-slate-200/80 shadow-xs">
-                <div className="w-7 h-7 rounded-xl bg-gradient-to-br from-sky-600 to-indigo-600 text-white font-bold flex items-center justify-center text-xs shadow-xs">
+                <div
+                  className={`w-7 h-7 rounded-xl text-white font-bold flex items-center justify-center text-xs shadow-xs ${
+                    userRole === "admin"
+                      ? "bg-gradient-to-br from-purple-600 to-indigo-600"
+                      : userRole === "doctor"
+                      ? "bg-gradient-to-br from-emerald-600 to-teal-600"
+                      : "bg-gradient-to-br from-sky-600 to-indigo-600"
+                  }`}
+                >
                   {user.username?.charAt(0) || user.email?.charAt(0) || "U"}
                 </div>
                 <div className="hidden sm:block text-left">
                   <p className="text-xs font-bold text-slate-900 leading-none">
-                    {user.username || user.email.split("@")[0]}
+                    {user.username || user.email?.split("@")[0]}
                   </p>
-                  <span className="text-[10px] font-semibold text-slate-400 capitalize">
-                    {user.role || "Member"}
-                  </span>
+                  <div className="flex items-center gap-1 mt-0.5">
+                    {userRole === "admin" && (
+                      <span className="inline-flex items-center gap-0.5 px-1.5 py-0.2 rounded-md bg-purple-100 text-purple-700 text-[10px] font-extrabold uppercase tracking-wider">
+                        <ShieldCheck className="w-2.5 h-2.5" />
+                        Admin
+                      </span>
+                    )}
+                    {userRole === "doctor" && (
+                      <span className="inline-flex items-center gap-0.5 px-1.5 py-0.2 rounded-md bg-emerald-100 text-emerald-700 text-[10px] font-extrabold uppercase tracking-wider">
+                        <Stethoscope className="w-2.5 h-2.5" />
+                        Doctor
+                      </span>
+                    )}
+                    {userRole === "patient" && (
+                      <span className="inline-flex items-center gap-0.5 px-1.5 py-0.2 rounded-md bg-sky-100 text-sky-700 text-[10px] font-extrabold uppercase tracking-wider">
+                        <User className="w-2.5 h-2.5" />
+                        Patient
+                      </span>
+                    )}
+                  </div>
                 </div>
                 <button
                   type="button"
@@ -179,8 +209,109 @@ const Navbar = () => {
               </Link>
             </div>
           )}
+
+          {/* Mobile Menu Toggle Button */}
+          <button
+            type="button"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="md:hidden p-2 rounded-xl text-slate-600 hover:bg-slate-100 transition"
+            aria-label="Toggle menu"
+          >
+            {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </button>
         </div>
       </div>
+
+      {/* Mobile Navigation Dropdown */}
+      {mobileMenuOpen && (
+        <div className="md:hidden pt-3 pb-2 border-t border-slate-200/80 mt-3 space-y-1">
+          <Link
+            to="/"
+            onClick={() => setMobileMenuOpen(false)}
+            className={`px-3 py-2 rounded-xl text-xs font-bold transition flex items-center justify-between ${
+              isActive("/") && location.pathname === "/"
+                ? "bg-slate-100 text-slate-900"
+                : "text-slate-600 hover:bg-slate-50"
+            }`}
+          >
+            <div className="flex items-center gap-2">
+              <Home className="w-4 h-4" />
+              <span>Home</span>
+            </div>
+            <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
+          </Link>
+
+          <Link
+            to="/admin"
+            onClick={() => setMobileMenuOpen(false)}
+            className={`px-3 py-2 rounded-xl text-xs font-bold transition flex items-center justify-between ${
+              isActive("/admin")
+                ? "bg-purple-100 text-purple-900 font-extrabold"
+                : "text-slate-600 hover:bg-purple-50 hover:text-purple-700"
+            }`}
+          >
+            <div className="flex items-center gap-2">
+              <ShieldCheck className="w-4 h-4 text-purple-600" />
+              <span>Admin Portal</span>
+            </div>
+            <span className="px-2 py-0.5 rounded-full bg-purple-200 text-purple-800 text-[10px]">
+              Admin
+            </span>
+          </Link>
+
+          <Link
+            to="/doctor"
+            onClick={() => setMobileMenuOpen(false)}
+            className={`px-3 py-2 rounded-xl text-xs font-bold transition flex items-center justify-between ${
+              isActive("/doctor")
+                ? "bg-emerald-100 text-emerald-900 font-extrabold"
+                : "text-slate-600 hover:bg-emerald-50 hover:text-emerald-700"
+            }`}
+          >
+            <div className="flex items-center gap-2">
+              <Stethoscope className="w-4 h-4 text-emerald-600" />
+              <span>Doctor Portal</span>
+            </div>
+            <span className="px-2 py-0.5 rounded-full bg-emerald-200 text-emerald-800 text-[10px]">
+              Doctor
+            </span>
+          </Link>
+
+          <Link
+            to="/patient"
+            onClick={() => setMobileMenuOpen(false)}
+            className={`px-3 py-2 rounded-xl text-xs font-bold transition flex items-center justify-between ${
+              isActive("/patient")
+                ? "bg-sky-100 text-sky-900 font-extrabold"
+                : "text-slate-600 hover:bg-sky-50 hover:text-sky-700"
+            }`}
+          >
+            <div className="flex items-center gap-2">
+              <User className="w-4 h-4 text-sky-600" />
+              <span>Patient Portal</span>
+            </div>
+            <span className="px-2 py-0.5 rounded-full bg-sky-200 text-sky-800 text-[10px]">
+              Patient
+            </span>
+          </Link>
+
+          <Link
+            to="/contact"
+            onClick={() => setMobileMenuOpen(false)}
+            className={`px-3 py-2 rounded-xl text-xs font-bold transition flex items-center justify-between ${
+              isActive("/contact")
+                ? "bg-slate-100 text-slate-900"
+                : "text-slate-600 hover:bg-slate-50"
+            }`}
+          >
+            <div className="flex items-center gap-2">
+              <PhoneCall className="w-4 h-4" />
+              <span>Help & Support</span>
+            </div>
+            <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
+          </Link>
+        </div>
+      )}
     </header>
   );
 };
