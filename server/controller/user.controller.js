@@ -37,8 +37,16 @@ export const signup = async (req, res) => {
       return res.status(400).json({ message: "Invalid input data.", success: false });
     }
 
-    // Normalize role: admin, doctor, patient (default: patient)
-    const normalizedRole = role === "admin" ? "admin" : role === "doctor" ? "doctor" : "patient";
+    // Direct registration with admin role is not allowed
+    if (role && role.toString().trim().toLowerCase() === "admin") {
+      return res.status(403).json({
+        message: "Direct registration with admin role is not allowed.",
+        success: false,
+      });
+    }
+
+    // Normalize role: only doctor or patient allowed via public signup (default: patient)
+    const normalizedRole = role?.toString().trim().toLowerCase() === "doctor" ? "doctor" : "patient";
 
     let profileUrl = "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=200";
     let profilePublicId = "";
@@ -49,7 +57,7 @@ export const signup = async (req, res) => {
         profileUrl = uploaded.secure_url;
         profilePublicId = uploaded.public_id;
       } catch (uploadErr) {
-        console.warn("Cloudinary upload skipped:", uploadErr.message);
+        console.warn("Cloudinary upload skipped:", uploadErr?.message || uploadErr);
       }
     }
 

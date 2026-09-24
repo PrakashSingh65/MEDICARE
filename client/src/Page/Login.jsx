@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { ShieldCheck, Stethoscope, User, Lock, Mail, AlertCircle, Sparkles } from "lucide-react";
+import { Lock, Mail, AlertCircle, Sparkles } from "lucide-react";
 import { useLogin } from "../api/authApi";
 import { setCredentials } from "../redux/authSlice";
 
@@ -35,24 +35,6 @@ export default function Login() {
     );
   };
 
-  const handleQuickFill = (demoEmail, demoPassword, role) => {
-    setEmail(demoEmail);
-    setPassword(demoPassword);
-    loginMutation.mutate(
-      { email: demoEmail, password: demoPassword },
-      {
-        onSuccess: (data) => {
-          if (data?.user) {
-            dispatch(setCredentials(data.user));
-            if (role === "admin") navigate("/admin");
-            else if (role === "doctor") navigate("/doctor");
-            else navigate("/patient");
-          }
-        },
-      }
-    );
-  };
-
   const isSubmitting = loginMutation.isPending || loginMutation.isLoading;
 
   return (
@@ -67,39 +49,6 @@ export default function Login() {
           <p className="mt-2 text-xs text-slate-500">
             Sign in to access your clinical dashboard or patient portal.
           </p>
-        </div>
-
-        {/* Quick Demo One-Click Fill & Login */}
-        <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-2">
-          <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 block text-center">
-            One-Click Demo Access
-          </span>
-          <div className="grid grid-cols-3 gap-2 pt-1">
-            <button
-              type="button"
-              onClick={() => handleQuickFill("admin@medicare.com", "password123", "admin")}
-              className="px-2 py-1.5 rounded-xl bg-purple-50 hover:bg-purple-600 hover:text-white text-purple-700 text-xs font-bold transition flex flex-col items-center gap-1 border border-purple-100"
-            >
-              <ShieldCheck className="w-4 h-4" />
-              <span>Admin</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => handleQuickFill("doctor@medicare.com", "password123", "doctor")}
-              className="px-2 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-600 hover:text-white text-emerald-700 text-xs font-bold transition flex flex-col items-center gap-1 border border-emerald-100"
-            >
-              <Stethoscope className="w-4 h-4" />
-              <span>Doctor</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => handleQuickFill("patient@medicare.com", "password123", "patient")}
-              className="px-2 py-1.5 rounded-xl bg-sky-50 hover:bg-sky-600 hover:text-white text-sky-700 text-xs font-bold transition flex flex-col items-center gap-1 border border-sky-100"
-            >
-              <User className="w-4 h-4" />
-              <span>Patient</span>
-            </button>
-          </div>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">

@@ -1,9 +1,7 @@
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
-  ShieldCheck,
   Stethoscope,
-  User,
   Users,
   Pill,
   TrendingUp,
@@ -82,65 +80,6 @@ export default function PanelLayout({ role = "admin", title, subtitle, children 
 
   return (
     <div className="min-h-screen mesh-bg flex flex-col antialiased">
-      {/* Dynamic Sub-header Panel Switcher Strip */}
-      <div className="bg-slate-950 text-white px-4 sm:px-8 py-2 flex flex-wrap items-center justify-between gap-3 text-xs border-b border-slate-800/80">
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-            </span>
-            <span className="text-slate-400 font-medium">Workspace:</span>
-            <span className="font-extrabold uppercase tracking-wider text-white">
-              {theme.roleLabel}
-            </span>
-          </div>
-          <span className="hidden md:inline-block text-slate-600">•</span>
-          <span className="hidden md:inline-block text-slate-400 font-medium">
-            Medicare Health Cloud (Safe Sandbox)
-          </span>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <span className="text-slate-400 font-medium hidden sm:inline">Switch Workspace:</span>
-          <div className="flex items-center bg-slate-900/90 p-1 rounded-xl border border-slate-800">
-            <Link
-              to="/admin"
-              className={`px-3 py-1 rounded-lg transition font-bold flex items-center gap-1.5 ${
-                role === "admin"
-                  ? "bg-purple-600 text-white shadow-xs"
-                  : "text-slate-400 hover:text-white"
-              }`}
-            >
-              <ShieldCheck className="w-3.5 h-3.5" />
-              <span>Admin</span>
-            </Link>
-            <Link
-              to="/doctor"
-              className={`px-3 py-1 rounded-lg transition font-bold flex items-center gap-1.5 ${
-                role === "doctor"
-                  ? "bg-emerald-600 text-white shadow-xs"
-                  : "text-slate-400 hover:text-white"
-              }`}
-            >
-              <Stethoscope className="w-3.5 h-3.5" />
-              <span>Doctor</span>
-            </Link>
-            <Link
-              to="/patient"
-              className={`px-3 py-1 rounded-lg transition font-bold flex items-center gap-1.5 ${
-                role === "patient"
-                  ? "bg-sky-600 text-white shadow-xs"
-                  : "text-slate-400 hover:text-white"
-              }`}
-            >
-              <User className="w-3.5 h-3.5" />
-              <span>Patient</span>
-            </Link>
-          </div>
-        </div>
-      </div>
-
       <div className="flex-1 flex flex-col lg:flex-row">
         {/* Aesthetic Desktop Sidebar */}
         <aside className="hidden lg:flex flex-col w-68 border-r border-slate-200/80 bg-white/90 backdrop-blur-md p-5 space-y-6">

@@ -8,10 +8,18 @@ import {
 import upload  from "../middleware/upload.middleware.js";
 import { authMiddleware } from "../middleware/auth.middleware.js";
 import { authorizeRoles } from "../middleware/role.middleware.js";
-
 const router = express.Router();
 
-router.route("/signup").post(upload.single("image"), signup);
+const handleUpload = (req, res, next) => {
+  upload.single("image")(req, res, (err) => {
+    if (err) {
+      console.warn("Upload middleware notice:", err.message);
+    }
+    next();
+  });
+};
+
+router.route("/signup").post(handleUpload, signup);
 router.route("/login").post(login);
 router.route("/logout").post(logout);
 router.route("/checkAuth").get(authMiddleware, checkAuth);

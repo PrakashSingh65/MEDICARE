@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { ShieldCheck, Stethoscope, User, Sparkles } from "lucide-react";
+import { Stethoscope, User, Sparkles } from "lucide-react";
 import { setCredentials } from "../redux/authSlice";
 import { useSignup } from "../api/authApi";
 
@@ -65,7 +65,7 @@ export default function Signup() {
             <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">
               Select Your Role
             </label>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-2 gap-3">
               <button
                 type="button"
                 onClick={() => setRole("patient")}
@@ -94,21 +94,6 @@ export default function Signup() {
                   <Stethoscope className="w-4 h-4" />
                 </div>
                 <span className="text-xs font-bold">Doctor</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setRole("admin")}
-                className={`p-3 rounded-2xl border text-center transition flex flex-col items-center gap-1.5 ${
-                  role === "admin"
-                    ? "border-purple-500 bg-purple-50/80 text-purple-800 ring-2 ring-purple-200 shadow-sm"
-                    : "border-slate-200 bg-slate-50 text-slate-600 hover:border-slate-300 hover:bg-white"
-                }`}
-              >
-                <div className={`p-2 rounded-xl ${role === "admin" ? "bg-purple-600 text-white" : "bg-slate-200 text-slate-600"}`}>
-                  <ShieldCheck className="w-4 h-4" />
-                </div>
-                <span className="text-xs font-bold">Admin</span>
               </button>
             </div>
           </div>

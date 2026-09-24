@@ -3,7 +3,6 @@ import dotenv from "dotenv";
 dotenv.config();
 import cors from "cors";
 import cookieParser from "cookie-parser";
-import fileUpload from "express-fileupload";
 import userRouter from "./router/user.routes.js";
 import { ConnectDB } from "./config/db.js";
 
@@ -17,11 +16,6 @@ app.use(cors({
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(fileUpload({
-  createParentPath: true,
-  limits: { fileSize: 10 * 1024 * 1024 },
-  abortOnLimit: true,
-}));
 
 app.use("/api/v1/auth", userRouter);
 
