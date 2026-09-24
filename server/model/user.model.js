@@ -38,12 +38,11 @@ const userSchema = new Schema({
 },{ timestamps: true });
 
 
-userSchema.pre('save', async function(next) {
+userSchema.pre('save', async function() {
     if (this.isModified('password')) {
         this.password = await bcrypt.hash(this.password, 12);
     }
-    next()
-})
+});
 
 userSchema.methods.comparePassword = async function(password) {
     return await bcrypt.compare(password, this.password)

@@ -79,9 +79,18 @@ export const signup = async (req, res) => {
       });
     }
 
-    const userExists = await User.findOne({ email: email.trim().toLowerCase() });
-    if (userExists) {
-      return res.status(401).json({ message: "User already exists", success: false });
+    const existingUser = await User.findOne({
+      $or: [
+        { email: email.trim().toLowerCase() },
+        { username: username.trim() },
+      ],
+    });
+    if (existingUser) {
+      const isEmail = existingUser.email === email.trim().toLowerCase();
+      return res.status(400).json({
+        message: isEmail ? "An account with this email already exists." : "This username is already taken.",
+        success: false,
+      });
     }
 
     const user = await User.create({
@@ -109,6 +118,10 @@ export const signup = async (req, res) => {
     });
   } catch (error) {
     console.error("Signup error:", error);
+    if (error.code === 11000) {
+      const field = Object.keys(error.keyPattern || {})[0] || "field";
+      return res.status(400).json({ message: `An account with this ${field} already exists.`, success: false });
+    }
     return res.status(500).json({ message: "Signup failed.", error: error.message, success: false });
   }
 };
