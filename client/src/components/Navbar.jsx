@@ -109,9 +109,14 @@ const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [avatarError, setAvatarError] = useState(false);
   const user = useSelector(selectCurrentUser);
   const { data: persistedUser } = useCheckAuth();
   const { mutate: logoutMutate, isPending: isLoggingOut } = useLogout();
+
+  useEffect(() => {
+    setAvatarError(false);
+  }, [user?.imageUrl]);
 
   useEffect(() => {
     if (persistedUser?.user) {
@@ -215,11 +220,20 @@ const Navbar = () => {
                 title={`Go to ${currentConfig.name} Dashboard`}
                 className="flex items-center gap-2.5 pl-3 pr-2 py-1.5 rounded-2xl bg-white border border-slate-200/80 shadow-xs hover:border-slate-300 transition group"
               >
-                <div
-                  className={`w-7 h-7 rounded-xl text-white font-bold flex items-center justify-center text-xs shadow-xs transition group-hover:scale-105 ${currentConfig.avatarGradient}`}
-                >
-                  {user.username?.charAt(0)?.toUpperCase() || user.email?.charAt(0)?.toUpperCase() || "U"}
-                </div>
+                {user.imageUrl && !avatarError ? (
+                  <img
+                    src={user.imageUrl}
+                    alt={user.username || "User avatar"}
+                    onError={() => setAvatarError(true)}
+                    className="w-7 h-7 rounded-xl object-cover border border-slate-200 shadow-xs transition group-hover:scale-105"
+                  />
+                ) : (
+                  <div
+                    className={`w-7 h-7 rounded-xl text-white font-bold flex items-center justify-center text-xs shadow-xs transition group-hover:scale-105 ${currentConfig.avatarGradient}`}
+                  >
+                    {user.username?.charAt(0)?.toUpperCase() || user.email?.charAt(0)?.toUpperCase() || "U"}
+                  </div>
+                )}
                 <div className="hidden sm:block text-left">
                   <p className="text-xs font-bold text-slate-900 leading-none truncate max-w-[120px]">
                     {user.username || user.email?.split("@")[0]}
@@ -280,11 +294,20 @@ const Navbar = () => {
           {user && (
             <div className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 border border-slate-200/80 mb-2">
               <div className="flex items-center gap-2.5">
-                <div
-                  className={`w-9 h-9 rounded-xl text-white font-bold flex items-center justify-center text-sm shadow-xs ${currentConfig.avatarGradient}`}
-                >
-                  {user.username?.charAt(0)?.toUpperCase() || user.email?.charAt(0)?.toUpperCase() || "U"}
-                </div>
+                {user.imageUrl && !avatarError ? (
+                  <img
+                    src={user.imageUrl}
+                    alt={user.username || "User avatar"}
+                    onError={() => setAvatarError(true)}
+                    className="w-9 h-9 rounded-xl object-cover border border-slate-200 shadow-xs"
+                  />
+                ) : (
+                  <div
+                    className={`w-9 h-9 rounded-xl text-white font-bold flex items-center justify-center text-sm shadow-xs ${currentConfig.avatarGradient}`}
+                  >
+                    {user.username?.charAt(0)?.toUpperCase() || user.email?.charAt(0)?.toUpperCase() || "U"}
+                  </div>
+                )}
                 <div>
                   <p className="text-xs font-bold text-slate-900 leading-tight">
                     {user.username || user.email?.split("@")[0]}

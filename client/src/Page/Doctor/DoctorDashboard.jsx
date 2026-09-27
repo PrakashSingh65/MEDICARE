@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { selectCurrentUser } from "../../redux/authSlice";
 import {
   Stethoscope,
   Calendar,
@@ -29,8 +31,20 @@ import {
 } from "../../data/mockData";
 
 export default function DoctorDashboard() {
+  const user = useSelector(selectCurrentUser);
   const doctors = getDoctors();
-  const currentDoctor = doctors[0]; // Dr. Priya Sharma
+  const matchedDoctor =
+    doctors.find(
+      (d) =>
+        (user?.email && d.email?.toLowerCase() === user.email.toLowerCase()) ||
+        (user?.username && d.name?.toLowerCase() === user.username.toLowerCase())
+    ) || doctors[0];
+
+  const currentDoctor = {
+    ...matchedDoctor,
+    name: user?.username || matchedDoctor.name,
+    avatar: user?.imageUrl || matchedDoctor.avatar,
+  };
   const [appointments, setAppointments] = useState(getAppointments);
   const patients = getPatients();
 

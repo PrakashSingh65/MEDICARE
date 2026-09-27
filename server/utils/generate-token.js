@@ -5,12 +5,14 @@ export const generateToken = (userOrId, res, extraData = {}) => {
     let role = extraData.role || 'patient';
     let email = extraData.email || '';
     let username = extraData.username || '';
+    let imageUrl = extraData.imageUrl || '';
 
     if (typeof userOrId === 'object' && userOrId !== null) {
         userId = userOrId._id || userOrId.id;
         role = userOrId.role || extraData.role || 'patient';
         email = userOrId.email || extraData.email || '';
         username = userOrId.username || extraData.username || '';
+        imageUrl = userOrId.imageUrl || extraData.imageUrl || '';
     }
 
     // Normalize 'user' role to 'patient'
@@ -20,7 +22,7 @@ export const generateToken = (userOrId, res, extraData = {}) => {
 
     const secret = process.env.JWT_SECRET_TOKEN || 'medicare_jwt_secret_token_2026';
     const token = jwt.sign(
-        { userId, role, email, username },
+        { userId, role, email, username, imageUrl },
         secret,
         { expiresIn: '7d' }
     );

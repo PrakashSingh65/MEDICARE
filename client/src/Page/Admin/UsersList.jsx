@@ -83,9 +83,17 @@ export default function UsersList() {
                 <div>
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-center gap-3.5">
-                      <div className="w-13 h-13 rounded-2xl bg-gradient-to-tr from-purple-600 via-indigo-600 to-sky-600 text-white font-black flex items-center justify-center text-lg shadow-sm group-hover:scale-105 transition-transform">
-                        {patient.name?.charAt(0) || "P"}
-                      </div>
+                      {patient.avatar ? (
+                        <img
+                          src={patient.avatar}
+                          alt={patient.name}
+                          className="w-13 h-13 rounded-2xl object-cover border border-slate-200 shadow-sm group-hover:scale-105 transition-transform"
+                        />
+                      ) : (
+                        <div className="w-13 h-13 rounded-2xl bg-gradient-to-tr from-purple-600 via-indigo-600 to-sky-600 text-white font-black flex items-center justify-center text-lg shadow-sm group-hover:scale-105 transition-transform">
+                          {patient.name?.charAt(0) || "P"}
+                        </div>
+                      )}
                       <div>
                         <h2 className="text-lg font-extrabold text-slate-900 leading-snug">{patient.name}</h2>
                         <p className="text-xs text-slate-400 flex items-center gap-1.5 mt-0.5 font-medium">

@@ -30,6 +30,8 @@ export const DEMO_USERS = {
   },
 };
 
+export const OFFLINE_USERS = new Map();
+
 export const signup = async (req, res) => {
   try {
     const { username, email, password, role } = req.body;
@@ -51,26 +53,35 @@ export const signup = async (req, res) => {
     let profileUrl = "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=200";
     let profilePublicId = "";
 
-    if (req.file) {
+    const uploadedFile = req.file || (Array.isArray(req.files) && req.files[0]);
+    if (uploadedFile) {
       try {
-        const uploaded = await UploadImage(req.file, "medicare-profile-images");
-        profileUrl = uploaded.secure_url;
-        profilePublicId = uploaded.public_id;
+        const baseUrl = `${req.protocol}://${req.get("host")}`;
+        const uploaded = await UploadImage(uploadedFile, "medicare-profile-images", baseUrl);
+        if (uploaded?.secure_url) {
+          profileUrl = uploaded.secure_url;
+          profilePublicId = uploaded.public_id || "";
+        }
       } catch (uploadErr) {
-        console.warn("Cloudinary upload skipped:", uploadErr?.message || uploadErr);
+        console.warn("Image upload warning:", uploadErr?.message || uploadErr);
       }
     }
 
-    // If MongoDB is offline, provide graceful simulated registration with correct role
+    // If MongoDB is offline, provide graceful simulated registration with correct role & imageUrl
     if (mongoose.connection.readyState !== 1) {
+      const userId = `user-${Date.now()}`;
       const demoUser = {
-        id: `user-${Date.now()}`,
-        _id: `user-${Date.now()}`,
+        id: userId,
+        _id: userId,
         username: username.trim(),
         email: email.trim().toLowerCase(),
         role: normalizedRole,
         imageUrl: profileUrl,
+        imageUrlId: profilePublicId,
       };
+      OFFLINE_USERS.set(demoUser.email, { ...demoUser, password });
+      OFFLINE_USERS.set(userId, demoUser);
+
       generateToken(demoUser, res);
       return res.status(201).json({
         message: "Account registered successfully.",
@@ -145,6 +156,18 @@ export const login = async (req, res) => {
       return res.status(200).json({
         message: `Welcome back, ${demoUser.username}!`,
         user: demoUser,
+        success: true,
+      });
+    }
+
+    // Check users registered during offline mode
+    if (OFFLINE_USERS.has(cleanEmail)) {
+      const storedUser = OFFLINE_USERS.get(cleanEmail);
+      const { password: _pw, ...publicUser } = storedUser;
+      generateToken(publicUser, res);
+      return res.status(200).json({
+        message: `Welcome back, ${publicUser.username}!`,
+        user: publicUser,
         success: true,
       });
     }

@@ -2,11 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { axiosClient } from "./axiosClient";
 
 export const signupUser = async (formData) => {
-  const response = await axiosClient.post("/api/v1/auth/signup", formData, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-  });
+  const response = await axiosClient.post("/api/v1/auth/signup", formData);
   return response.data;
 };
 
@@ -35,7 +31,10 @@ export const useSignup = () => {
 
   return useMutation({
     mutationFn: signupUser,
-    onSuccess: () => {
+    onSuccess: (data) => {
+      if (data?.user) {
+        queryClient.setQueryData(["auth"], data);
+      }
       queryClient.invalidateQueries({ queryKey: ["auth"] });
     },
   });
@@ -46,7 +45,10 @@ export const useLogin = () => {
 
   return useMutation({
     mutationFn: loginUser,
-    onSuccess: () => {
+    onSuccess: (data) => {
+      if (data?.user) {
+        queryClient.setQueryData(["auth"], data);
+      }
       queryClient.invalidateQueries({ queryKey: ["auth"] });
     },
   });

@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { selectCurrentUser } from "../../redux/authSlice";
 import {
   Calendar,
   Pill,
@@ -22,8 +24,20 @@ import PatientHistoryModal from "../../components/panels/PatientHistoryModal";
 import { getPatients, getAppointments, getDoctors } from "../../data/mockData";
 
 export default function PatientDashboard() {
+  const user = useSelector(selectCurrentUser);
   const patients = getPatients();
-  const currentPatient = patients[0]; // Aditi Kapoor
+  const matchedPatient =
+    patients.find(
+      (p) =>
+        (user?.email && p.email?.toLowerCase() === user.email.toLowerCase()) ||
+        (user?.username && p.name?.toLowerCase() === user.username.toLowerCase())
+    ) || patients[0];
+
+  const currentPatient = {
+    ...matchedPatient,
+    name: user?.username || matchedPatient.name,
+    avatar: user?.imageUrl || matchedPatient.avatar,
+  };
   const [appointments, setAppointments] = useState(getAppointments);
   const [isBookModalOpen, setIsBookModalOpen] = useState(false);
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
@@ -46,26 +60,38 @@ export default function PatientDashboard() {
         {/* Next Appointment & Care Journey Banner */}
         <div className="rounded-3xl bg-gradient-to-r from-sky-700 via-indigo-800 to-slate-950 p-6 sm:p-10 text-white shadow-xl relative overflow-hidden border border-sky-600/30">
           <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-            <div className="space-y-3 max-w-2xl">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white/15 text-sky-200 text-xs font-bold backdrop-blur-md border border-white/10">
-                <ShieldCheck className="w-3.5 h-3.5" />
-                <span>Medicare {currentPatient.plan} Health Plan Active</span>
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-              </div>
-
-              <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-                {nextAppointment ? "Upcoming Specialist Consultation" : "Keep Your Preventive Care on Track"}
-              </h2>
-
-              {nextAppointment ? (
-                <p className="text-sky-100/90 text-xs sm:text-sm leading-relaxed">
-                  You have a confirmed appointment with <strong className="text-white">{nextAppointment.doctorName}</strong> ({nextAppointment.doctorSpecialty}) on <strong className="text-white">{nextAppointment.date}</strong> at <strong className="text-white">{nextAppointment.time}</strong>.
-                </p>
-              ) : (
-                <p className="text-sky-100/90 text-xs sm:text-sm leading-relaxed">
-                  Schedule your routine checkup or consult with our verified cardiologists, pediatricians, and specialists.
-                </p>
+            <div className="flex items-start sm:items-center gap-5 max-w-2xl">
+              {currentPatient.avatar && (
+                <div className="relative shrink-0">
+                  <img
+                    src={currentPatient.avatar}
+                    alt={currentPatient.name}
+                    className="w-20 h-20 rounded-3xl object-cover border-2 border-white/90 shadow-lg"
+                  />
+                  <span className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-emerald-400 border-2 border-slate-900"></span>
+                </div>
               )}
+              <div className="space-y-3">
+                <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white/15 text-sky-200 text-xs font-bold backdrop-blur-md border border-white/10">
+                  <ShieldCheck className="w-3.5 h-3.5" />
+                  <span>Medicare {currentPatient.plan} Health Plan Active</span>
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                </div>
+
+                <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+                  {nextAppointment ? "Upcoming Specialist Consultation" : "Keep Your Preventive Care on Track"}
+                </h2>
+
+                {nextAppointment ? (
+                  <p className="text-sky-100/90 text-xs sm:text-sm leading-relaxed">
+                    You have a confirmed appointment with <strong className="text-white">{nextAppointment.doctorName}</strong> ({nextAppointment.doctorSpecialty}) on <strong className="text-white">{nextAppointment.date}</strong> at <strong className="text-white">{nextAppointment.time}</strong>.
+                  </p>
+                ) : (
+                  <p className="text-sky-100/90 text-xs sm:text-sm leading-relaxed">
+                    Schedule your routine checkup or consult with our verified cardiologists, pediatricians, and specialists.
+                  </p>
+                )}
+              </div>
             </div>
 
             <div className="flex flex-wrap items-center gap-3">

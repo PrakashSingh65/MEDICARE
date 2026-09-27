@@ -1,5 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { selectCurrentUser } from "../../redux/authSlice";
 import {
   Stethoscope,
   Users,
@@ -21,7 +23,13 @@ import {
 
 export default function PanelLayout({ role = "admin", title, subtitle, children }) {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [avatarError, setAvatarError] = useState(false);
   const location = useLocation();
+  const user = useSelector(selectCurrentUser);
+
+  useEffect(() => {
+    setAvatarError(false);
+  }, [user?.imageUrl]);
 
   const navigationConfig = {
     admin: [
@@ -85,18 +93,27 @@ export default function PanelLayout({ role = "admin", title, subtitle, children 
         <aside className="hidden lg:flex flex-col w-68 border-r border-slate-200/80 bg-white/90 backdrop-blur-md p-5 space-y-6">
           <div className="p-4 rounded-3xl bg-slate-50 border border-slate-200/80 space-y-3">
             <div className="flex items-center gap-3">
-              <div
-                className={`w-11 h-11 rounded-2xl ${theme.iconBg} text-white flex items-center justify-center font-black text-lg shadow-md`}
-              >
-                {role === "admin" ? "A" : role === "doctor" ? "Dr" : "Pt"}
-              </div>
+              {user?.imageUrl && !avatarError ? (
+                <img
+                  src={user.imageUrl}
+                  alt={user.username || theme.roleLabel}
+                  onError={() => setAvatarError(true)}
+                  className="w-11 h-11 rounded-2xl object-cover border-2 border-white shadow-md shrink-0"
+                />
+              ) : (
+                <div
+                  className={`w-11 h-11 rounded-2xl ${theme.iconBg} text-white flex items-center justify-center font-black text-lg shadow-md shrink-0`}
+                >
+                  {role === "admin" ? "A" : role === "doctor" ? "Dr" : "Pt"}
+                </div>
+              )}
               <div className="overflow-hidden">
                 <p className="font-extrabold text-slate-900 text-sm leading-tight truncate">
-                  {theme.roleLabel}
+                  {user?.username || theme.roleLabel}
                 </p>
-                <p className="text-[11px] text-slate-500 font-semibold flex items-center gap-1 mt-0.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                  <span>Verified Session</span>
+                <p className="text-[11px] text-slate-500 font-semibold flex items-center gap-1 mt-0.5 truncate">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0"></span>
+                  <span className="truncate">{theme.roleLabel}</span>
                 </p>
               </div>
             </div>

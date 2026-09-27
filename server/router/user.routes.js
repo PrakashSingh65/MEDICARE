@@ -11,9 +11,18 @@ import { authorizeRoles } from "../middleware/role.middleware.js";
 const router = express.Router();
 
 const handleUpload = (req, res, next) => {
-  upload.single("image")(req, res, (err) => {
+  upload.any()(req, res, (err) => {
     if (err) {
       console.warn("Upload middleware notice:", err.message);
+      return res.status(400).json({
+        message: err.message || "Failed to process uploaded image.",
+        success: false,
+      });
+    }
+    if (!req.file && Array.isArray(req.files) && req.files.length > 0) {
+      req.file =
+        req.files.find((f) => f.fieldname === "image" || f.fieldname === "avatar") ||
+        req.files[0];
     }
     next();
   });

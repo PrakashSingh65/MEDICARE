@@ -206,9 +206,17 @@ export default function AdminDashboard() {
                     className="p-3.5 rounded-2xl border border-slate-100 bg-slate-50/60 hover:bg-white hover:border-emerald-200 hover:shadow-xs transition-all flex items-center justify-between gap-3"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white font-black flex items-center justify-center text-sm shadow-xs">
-                        {patient.name.charAt(0)}
-                      </div>
+                      {patient.avatar ? (
+                        <img
+                          src={patient.avatar}
+                          alt={patient.name}
+                          className="w-12 h-12 rounded-2xl object-cover border border-white shadow-xs"
+                        />
+                      ) : (
+                        <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white font-black flex items-center justify-center text-sm shadow-xs">
+                          {patient.name.charAt(0)}
+                        </div>
+                      )}
                       <div>
                         <div className="flex items-center gap-2">
                           <p className="font-bold text-slate-900 text-sm leading-snug">{patient.name}</p>
