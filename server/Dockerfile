@@ -19,5 +19,5 @@ COPY . .
 # Expose backend port
 EXPOSE 5000
 
-# Run with nodemon for live reload
-CMD ["nodemon", "server.js"]
+# Run with nodemon (-L for legacy watch across Docker volume mounts)
+CMD ["nodemon", "-L", "server.js"]
