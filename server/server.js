@@ -7,6 +7,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import userRouter from "./router/user.routes.js";
 import adminRouter from "./router/admin.routes.js";
+import doctorRouter from "./router/doctor.routes.js";
 import { ConnectDB } from "./config/db.js";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -28,6 +29,7 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 app.use("/api/v1/auth", userRouter);
 app.use("/api/v1/admin", adminRouter);
+app.use("/api/v1/doctor", doctorRouter);
 
 app.get("/", (req, res) => {
   res.json({ message: "Welcome to the Medicare API!", status: "healthy" });

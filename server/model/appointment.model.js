@@ -1,5 +1,18 @@
 import { model, Schema } from "mongoose";
 
+const rescheduleLogSchema = new Schema(
+  {
+    previousDate: { type: Date },
+    previousTimeSlot: { type: String },
+    newDate: { type: Date, required: true },
+    newTimeSlot: { type: String, required: true },
+    reason: { type: String, default: "" },
+    rescheduledBy: { type: String, default: "doctor" },
+    rescheduledAt: { type: Date, default: Date.now },
+  },
+  { _id: true }
+);
+
 const appointmentSchema = new Schema(
   {
     patientId: { type: Schema.Types.ObjectId, ref: "Patient", required: true },
@@ -11,9 +24,26 @@ const appointmentSchema = new Schema(
     department: { type: String, trim: true, default: "" },
     appointmentDate: { type: Date, required: true },
     timeSlot: { type: String, required: true },
+    consultationType: {
+      type: String,
+      enum: ["in_clinic", "video", "chat"],
+      default: "video",
+    },
     status: {
       type: String,
-      enum: ["scheduled", "confirmed", "completed", "cancelled", "disputed", "no_show"],
+      enum: [
+        "pending",
+        "scheduled",
+        "confirmed",
+        "accepted",
+        "rejected",
+        "rescheduled",
+        "in_progress",
+        "completed",
+        "cancelled",
+        "disputed",
+        "no_show",
+      ],
       default: "scheduled",
     },
     fee: { type: Number, required: true, default: 500 },
@@ -22,9 +52,12 @@ const appointmentSchema = new Schema(
       enum: ["pending", "paid", "refunded", "failed"],
       default: "pending",
     },
+    reasonForVisit: { type: String, default: "" },
+    rejectionReason: { type: String, default: "" },
     cancellationReason: { type: String, default: "" },
     cancelledBy: { type: String, default: "" },
     cancelledAt: { type: Date },
+    rescheduleHistory: [rescheduleLogSchema],
     issue: {
       hasIssue: { type: Boolean, default: false },
       description: { type: String, default: "" },

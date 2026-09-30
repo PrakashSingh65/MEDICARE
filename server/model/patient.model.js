@@ -11,6 +11,31 @@ const activityItemSchema = new Schema(
   { _id: true }
 );
 
+const medicalHistoryItemSchema = new Schema(
+  {
+    condition: { type: String, required: true, trim: true },
+    diagnosedDate: { type: Date },
+    status: {
+      type: String,
+      enum: ["active", "resolved", "chronic"],
+      default: "active",
+    },
+    notes: { type: String, default: "" },
+  },
+  { _id: true }
+);
+
+const currentMedicationSchema = new Schema(
+  {
+    name: { type: String, required: true, trim: true },
+    dosage: { type: String, default: "" },
+    frequency: { type: String, default: "" },
+    startedAt: { type: Date, default: Date.now },
+    prescribedBy: { type: String, default: "" },
+  },
+  { _id: true }
+);
+
 const patientSchema = new Schema(
   {
     userId: { type: Schema.Types.ObjectId, ref: "User" },
@@ -31,6 +56,9 @@ const patientSchema = new Schema(
       default: "Standard",
     },
     medicalConditions: { type: [String], default: [] },
+    allergies: { type: [String], default: [] },
+    currentMedications: [currentMedicationSchema],
+    medicalHistory: [medicalHistoryItemSchema],
     accountStatus: {
       type: String,
       enum: ["active", "deactivated"],
