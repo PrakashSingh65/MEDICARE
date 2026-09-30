@@ -1,53 +1,59 @@
 import { model, Schema } from "mongoose";
-import bcrypt from 'bcryptjs';
+import bcrypt from "bcryptjs";
 
-const userSchema = new Schema({
+const userSchema = new Schema(
+  {
     username: {
-        type: String,
-        unique: true,
-        required: true,
-        trim: true,
+      type: String,
+      unique: true,
+      required: true,
+      trim: true,
     },
-
     email: {
-        type: String,
-        unique: true,
-        required: true,
-        trim: true,
+      type: String,
+      unique: true,
+      required: true,
+      trim: true,
     },
-
     password: {
-        type: String,
-        required: true,
+      type: String,
+      required: true,
     },
-
     imageUrl: {
-        type: String,
-        required: true,
-        default: "https://www.pexels.com/photo/man-wearing-blue-crew-neck-t-shirt-2379005/"
+      type: String,
+      required: true,
+      default: "https://www.pexels.com/photo/man-wearing-blue-crew-neck-t-shirt-2379005/",
     },
-
     imageUrlId: {
-        type: String,
+      type: String,
     },
     role: {
-        type: String,
-        enum: ['admin', 'doctor', 'patient', 'user'],
-        default: 'patient',
-    }
-},{ timestamps: true });
+      type: String,
+      enum: ["admin", "sub_admin", "doctor", "patient", "support", "user"],
+      default: "patient",
+    },
+    permissions: {
+      type: [String],
+      default: [],
+    },
+    isActive: {
+      type: Boolean,
+      default: true,
+    },
+  },
+  { timestamps: true }
+);
 
-
-userSchema.pre('save', async function() {
-    if (this.isModified('password')) {
-        this.password = await bcrypt.hash(this.password, 12);
-    }
+userSchema.pre("save", async function () {
+  if (this.isModified("password")) {
+    this.password = await bcrypt.hash(this.password, 12);
+  }
 });
 
-userSchema.methods.comparePassword = async function(password) {
-    return await bcrypt.compare(password, this.password)
-}
+userSchema.methods.comparePassword = async function (password) {
+  return await bcrypt.compare(password, this.password);
+};
 
-const User = model('User', userSchema);
+const User = model("User", userSchema);
 
 export default User;
