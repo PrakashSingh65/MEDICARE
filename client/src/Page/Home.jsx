@@ -9,7 +9,6 @@ import {
   Sparkles,
   TrendingUp,
   Pill,
-  HeartPulse,
   Award,
   CheckCircle2,
   Lock,
@@ -28,9 +27,7 @@ import {
   Heart,
   Droplets,
   ArrowUpRight,
-  HelpCircle,
   Check,
-  ChevronDown,
   Play,
   Mic,
   X,
@@ -330,78 +327,6 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] text-slate-900 selection:bg-teal-500 selection:text-white font-sans flex flex-col relative overflow-x-hidden">
-      
-      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-xl border-b border-slate-200/80 px-4 lg:px-8 py-3.5 shadow-xs transition-all">
-        <div className="max-w-[1720px] mx-auto flex items-center justify-between gap-4">
-          <div className="flex items-center gap-4 lg:gap-6">
-            <Link to="/" className="flex items-center gap-3 group">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#06B6D4] via-[#0D9488] to-[#6366F1] flex items-center justify-center text-white shadow-[0_0_18px_rgba(6,182,212,0.45)] group-hover:scale-105 transition-transform">
-                <HeartPulse className="w-5 h-5 text-white" />
-              </div>
-              <div className="flex flex-col">
-                <span className="text-xl font-black tracking-tight bg-gradient-to-r from-[#0A2540] via-[#0D9488] to-[#0066FF] bg-clip-text text-transparent drop-shadow-[0_0_8px_rgba(6,182,212,0.2)] flex items-center gap-1.5">
-                  MEDICARE
-                  <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 shadow-[0_0_8px_#06B6D4] animate-pulse"></span>
-                </span>
-                <span className="text-[10px] font-extrabold uppercase tracking-widest text-teal-700">
-                  Unified Clinical Platform
-                </span>
-              </div>
-            </Link>
-
-            <div className="hidden md:flex items-center gap-2.5 pl-4 border-l border-slate-200">
-              <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-teal-500/10 via-cyan-500/15 to-indigo-500/10 border border-cyan-400/50 text-teal-900 text-xs font-bold shadow-[0_0_15px_rgba(6,182,212,0.25)]">
-                <span className="w-2 h-2 rounded-full bg-cyan-500 shadow-[0_0_8px_#06B6D4] animate-ping"></span>
-                <span>Patient Workspace</span>
-              </div>
-
-              <div className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-blue-500/10 via-purple-500/15 to-pink-500/10 border border-blue-400/40 text-slate-800 text-xs font-semibold shadow-[0_0_15px_rgba(99,102,241,0.2)]">
-                <Radio className="w-3.5 h-3.5 text-[#0066FF] animate-pulse" />
-                <span className="font-extrabold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                  {activeConsultationsCount}
-                </span>
-                <span className="text-slate-600 font-medium">Active Consultations</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3 lg:gap-5">
-            <Link
-              to="/contact"
-              className="hidden sm:flex items-center gap-1.5 text-xs font-bold text-slate-600 hover:text-teal-700 transition px-3 py-2 rounded-xl hover:bg-slate-100/80"
-            >
-              <HelpCircle className="w-4 h-4 text-teal-600" />
-              <span>Help & Support</span>
-            </Link>
-
-            <div className="flex items-center gap-3 pl-3 border-l border-slate-200">
-              <Link
-                to="/patient/profile"
-                className="flex items-center gap-2.5 p-1 sm:px-3 sm:py-1.5 rounded-2xl bg-white hover:bg-slate-50 border border-slate-200/90 shadow-2xs transition group"
-              >
-                <div className="relative">
-                  <img
-                    src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=150"
-                    alt="sandip singh"
-                    className="w-8 h-8 rounded-full object-cover ring-2 ring-cyan-500 shadow-[0_0_10px_rgba(6,182,212,0.4)]"
-                  />
-                  <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-400 border-2 border-white rounded-full"></span>
-                </div>
-                <div className="text-left hidden sm:block">
-                  <span className="text-xs font-extrabold text-slate-900 group-hover:text-teal-700 transition block leading-tight">
-                    sandip singh
-                  </span>
-                  <span className="text-[10px] font-semibold text-slate-400 block leading-tight">
-                    Patient #MED-9924
-                  </span>
-                </div>
-                <ChevronDown className="w-3.5 h-3.5 text-slate-400 group-hover:text-slate-600 transition hidden sm:block" />
-              </Link>
-            </div>
-          </div>
-        </div>
-      </header>
-
       <div className="flex-1 max-w-[1720px] w-full mx-auto px-4 lg:px-8 py-8 space-y-10">
         
         <section className="grid lg:grid-cols-12 gap-8 items-start">
@@ -410,12 +335,19 @@ export default function Home() {
             <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-cyan-500/20 via-fuchsia-500/15 to-transparent rounded-full blur-3xl pointer-events-none"></div>
             <div className="absolute bottom-0 left-0 w-80 h-80 bg-gradient-to-tr from-teal-500/20 via-blue-600/15 to-transparent rounded-full blur-3xl pointer-events-none"></div>
             
-            <div className="flex items-center justify-between relative z-10 mb-2">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-cyan-950/80 border border-cyan-400/50 text-cyan-300 text-xs font-bold shadow-[0_0_15px_rgba(6,182,212,0.3)]">
-                <Sparkles className="w-3.5 h-3.5 text-cyan-400 animate-spin" style={{ animationDuration: '8s' }} />
-                <span>Global Telehealth Activity Network</span>
-                <span className="h-3 w-px bg-cyan-500/40"></span>
-                <span className="text-teal-300 font-medium">Real-time Telemetry</span>
+            <div className="flex flex-wrap items-center justify-between gap-3 relative z-10 mb-2">
+              <div className="flex flex-wrap items-center gap-2">
+                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-cyan-950/80 border border-cyan-400/50 text-cyan-300 text-xs font-bold shadow-[0_0_15px_rgba(6,182,212,0.3)]">
+                  <Sparkles className="w-3.5 h-3.5 text-cyan-400 animate-spin" style={{ animationDuration: '8s' }} />
+                  <span>Global Telehealth Activity Network</span>
+                  <span className="h-3 w-px bg-cyan-500/40"></span>
+                  <span className="text-teal-300 font-medium">Real-time Telemetry</span>
+                </div>
+                <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-cyan-950/80 border border-cyan-400/40 text-xs font-semibold shadow-[0_0_15px_rgba(6,182,212,0.2)]">
+                  <Radio className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />
+                  <span className="font-extrabold text-cyan-300">{activeConsultationsCount}</span>
+                  <span className="text-slate-300 font-medium text-[11px]">Active Consultations</span>
+                </div>
               </div>
               <span className="text-xs font-mono text-cyan-400 font-semibold drop-shadow-[0_0_8px_rgba(6,182,212,0.6)]">
                 NODE LATENCY: 14ms
