@@ -24,6 +24,7 @@ import {
   Sliders,
   FolderOpen,
   UserCheck,
+  Bell,
 } from "lucide-react";
 import { useLogout, useCheckAuth } from "../api/authApi";
 import { logout, setCredentials, selectCurrentUser } from "../redux/authSlice";
@@ -91,10 +92,13 @@ const roleConfig = {
     links: [
       { label: "Home", path: "/", icon: Home, exact: true },
       { label: "Dashboard", path: "/patient", icon: Activity, exact: true },
+      { label: "Profile", path: "/patient/profile", icon: UserCheck },
       { label: "Appointments", path: "/patient/appointments", icon: Calendar },
+      { label: "Records", path: "/patient/records", icon: FileText },
+      { label: "Consultation", path: "/patient/consultation", icon: Video },
       { label: "Prescriptions", path: "/patient/prescriptions", icon: Pill },
-      { label: "Medical History", path: "/patient/history", icon: FileText },
-      { label: "Help", path: "/contact", icon: PhoneCall },
+      { label: "Payments", path: "/patient/payments", icon: CreditCard },
+      { label: "Alerts", path: "/patient/notifications", icon: Bell },
     ],
   },
   guest: {

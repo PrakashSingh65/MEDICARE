@@ -62,9 +62,13 @@ export default function PanelLayout({ role = "admin", title, subtitle, children 
     ],
     patient: [
       { name: "Wellness Dashboard", path: "/patient", icon: Activity },
-      { name: "My Appointments", path: "/patient/appointments", icon: Calendar },
-      { name: "Prescriptions & Meds", path: "/patient/prescriptions", icon: Pill },
-      { name: "Medical History", path: "/patient/history", icon: FileText },
+      { name: "Health Profile", path: "/patient/profile", icon: UserCheck },
+      { name: "Appointments", path: "/patient/appointments", icon: Calendar },
+      { name: "Medical Records", path: "/patient/records", icon: FileText },
+      { name: "Live Consultation", path: "/patient/consultation", icon: Video },
+      { name: "Prescriptions", path: "/patient/prescriptions", icon: Pill },
+      { name: "Payments & Invoices", path: "/patient/payments", icon: CreditCard },
+      { name: "Notifications", path: "/patient/notifications", icon: Bell },
     ],
   };
 

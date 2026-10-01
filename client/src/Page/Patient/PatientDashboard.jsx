@@ -1,7 +1,5 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { useSelector } from "react-redux";
-import { selectCurrentUser } from "../../redux/authSlice";
 import {
   Calendar,
   Pill,
@@ -17,347 +15,299 @@ import {
   Sparkles,
   MapPin,
   CheckCircle2,
+  Video,
+  CreditCard,
+  Bell,
+  FolderOpen,
+  Phone,
+  AlertTriangle,
 } from "lucide-react";
 import PanelLayout from "../../components/panels/PanelLayout";
-import BookAppointmentModal from "../../components/panels/BookAppointmentModal";
-import PatientHistoryModal from "../../components/panels/PatientHistoryModal";
-import { getPatients, getAppointments, getDoctors } from "../../data/mockData";
+import {
+  getPatientProfile,
+  getPatientAppointments,
+  getPatientRecords,
+  getPatientPrescriptions,
+  getPatientNotifications,
+} from "../../data/patientMockData";
 
 export default function PatientDashboard() {
-  const user = useSelector(selectCurrentUser);
-  const patients = getPatients();
-  const matchedPatient =
-    patients.find(
-      (p) =>
-        (user?.email && p.email?.toLowerCase() === user.email.toLowerCase()) ||
-        (user?.username && p.name?.toLowerCase() === user.username.toLowerCase())
-    ) || patients[0];
+  const profile = getPatientProfile();
+  const appointments = getPatientAppointments();
+  const records = getPatientRecords();
+  const prescriptions = getPatientPrescriptions();
+  const notifications = getPatientNotifications();
 
-  const currentPatient = {
-    ...matchedPatient,
-    name: user?.username || matchedPatient.name,
-    avatar: user?.imageUrl || matchedPatient.avatar,
-  };
-  const [appointments, setAppointments] = useState(getAppointments);
-  const [isBookModalOpen, setIsBookModalOpen] = useState(false);
-  const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
-
-  const patientAppointments = appointments.filter(
-    (a) => a.patientName.toLowerCase() === currentPatient.name.toLowerCase()
-  );
-
-  const nextAppointment = patientAppointments[0];
-  const medicalHistory = currentPatient.medicalHistory || [];
-  const latestVisit = medicalHistory[0];
+  const upcomingAppointments = appointments.filter((a) => a.isUpcoming && a.status === "Confirmed");
+  const nextAppointment = upcomingAppointments[0];
+  const unreadNotifications = notifications.filter((n) => !n.read);
 
   return (
     <PanelLayout
       role="patient"
-      title={`Welcome back, ${currentPatient.name}`}
-      subtitle="Your personal health record, active medication dosages, upcoming specialist visits, and wellness metrics."
+      title="Patient Wellness Dashboard"
+      subtitle="Supervise your scheduled medical consultations, track digital prescriptions, access laboratory reports, and inspect diagnostic charts."
     >
       <div className="space-y-8">
-        {/* Next Appointment & Care Journey Banner */}
-        <div className="rounded-3xl bg-gradient-to-r from-sky-700 via-indigo-800 to-slate-950 p-6 sm:p-10 text-white shadow-xl relative overflow-hidden border border-sky-600/30">
+        <div className="rounded-3xl bg-gradient-to-r from-sky-900 via-indigo-950 to-slate-950 p-6 sm:p-10 text-white shadow-xl relative overflow-hidden border border-sky-800/40">
           <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-            <div className="flex items-start sm:items-center gap-5 max-w-2xl">
-              {currentPatient.avatar && (
-                <div className="relative shrink-0">
-                  <img
-                    src={currentPatient.avatar}
-                    alt={currentPatient.name}
-                    className="w-20 h-20 rounded-3xl object-cover border-2 border-white/90 shadow-lg"
-                  />
-                  <span className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-emerald-400 border-2 border-slate-900"></span>
+            <div className="flex items-start sm:items-center gap-5">
+              <div className="relative">
+                <img
+                  src={profile.avatar}
+                  alt={profile.name}
+                  className="w-20 h-20 rounded-3xl object-cover border-2 border-white/80 shadow-lg"
+                />
+                <span className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-emerald-400 border-2 border-slate-900"></span>
+              </div>
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <h2 className="text-xl sm:text-3xl font-black text-white">{profile.name}</h2>
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-sky-400/20 text-sky-200 border border-sky-400/30">
+                    {profile.plan}
+                  </span>
                 </div>
-              )}
-              <div className="space-y-3">
-                <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white/15 text-sky-200 text-xs font-bold backdrop-blur-md border border-white/10">
-                  <ShieldCheck className="w-3.5 h-3.5" />
-                  <span>Medicare {currentPatient.plan} Health Plan Active</span>
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-                </div>
-
-                <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-                  {nextAppointment ? "Upcoming Specialist Consultation" : "Keep Your Preventive Care on Track"}
-                </h2>
-
-                {nextAppointment ? (
-                  <p className="text-sky-100/90 text-xs sm:text-sm leading-relaxed">
-                    You have a confirmed appointment with <strong className="text-white">{nextAppointment.doctorName}</strong> ({nextAppointment.doctorSpecialty}) on <strong className="text-white">{nextAppointment.date}</strong> at <strong className="text-white">{nextAppointment.time}</strong>.
-                  </p>
-                ) : (
-                  <p className="text-sky-100/90 text-xs sm:text-sm leading-relaxed">
-                    Schedule your routine checkup or consult with our verified cardiologists, pediatricians, and specialists.
-                  </p>
-                )}
+                <p className="text-xs sm:text-sm text-sky-200 font-medium">
+                  {profile.gender} • Blood Group: <strong className="text-white font-black">{profile.bloodGroup}</strong> • Age: 29
+                </p>
+                <p className="text-xs text-slate-300 flex items-center gap-1.5">
+                  <MapPin className="w-3.5 h-3.5 text-sky-400" />
+                  <span>{profile.city}</span>
+                  <span>•</span>
+                  <span>Ph: {profile.phone}</span>
+                </p>
               </div>
             </div>
 
-            <div className="flex flex-wrap items-center gap-3">
-              <button
-                onClick={() => setIsBookModalOpen(true)}
-                className="px-5 py-3 rounded-2xl bg-white hover:bg-sky-50 text-slate-950 text-xs sm:text-sm font-extrabold shadow-lg transition flex items-center gap-2"
+            <div className="flex flex-wrap items-center gap-2.5">
+              <Link
+                to="/patient/appointments"
+                className="px-4 py-2.5 rounded-2xl bg-white hover:bg-sky-50 text-slate-950 text-xs font-bold shadow-lg transition flex items-center gap-1.5"
               >
                 <Plus className="w-4 h-4 text-sky-600" />
                 <span>Book Appointment</span>
-              </button>
-              <button
-                onClick={() => setIsHistoryModalOpen(true)}
-                className="px-5 py-3 rounded-2xl bg-white/10 hover:bg-white/20 text-white text-xs sm:text-sm font-bold border border-white/20 backdrop-blur-md transition flex items-center gap-2"
+              </Link>
+              <Link
+                to="/patient/consultation"
+                className="px-4 py-2.5 rounded-2xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold border border-white/20 backdrop-blur-md transition flex items-center gap-1.5"
               >
-                <FileText className="w-4 h-4" />
-                <span>My Full Health History</span>
-              </button>
+                <Video className="w-4 h-4" />
+                <span>Consultation Room</span>
+              </Link>
+              <Link
+                to="/patient/records"
+                className="px-4 py-2.5 rounded-2xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold border border-white/20 backdrop-blur-md transition flex items-center gap-1.5"
+              >
+                <FolderOpen className="w-4 h-4" />
+                <span>Medical Records</span>
+              </Link>
             </div>
           </div>
           <div className="absolute -right-12 -bottom-12 w-72 h-72 bg-sky-500/20 rounded-full blur-3xl pointer-events-none" />
         </div>
 
-        {/* Health Vitals & Profile Counters */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-xs hover:shadow-md transition">
-            <div className="flex items-center justify-between text-xs">
-              <span className="font-extrabold uppercase tracking-wider text-slate-400">Blood Profile</span>
-              <div className="w-10 h-10 rounded-2xl bg-red-50 text-red-600 flex items-center justify-center">
-                <Heart className="w-5 h-5" />
-              </div>
-            </div>
-            <div className="mt-4 flex items-baseline gap-2">
-              <span className="text-3xl font-black text-slate-900 tracking-tight">{currentPatient.bloodGroup || "B+"}</span>
-              <span className="text-xs font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded-full">Rh Positive</span>
-            </div>
-            <p className="text-xs text-slate-400 mt-2 font-medium">Verified lab record</p>
+          <div className="p-5 rounded-3xl bg-white border border-slate-200/80 shadow-xs space-y-1.5">
+            <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">Upcoming Visits</span>
+            <p className="text-2xl font-black text-slate-900">{upcomingAppointments.length}</p>
+            <p className="text-[11px] text-sky-600 font-bold">Next: {nextAppointment?.date || "None scheduled"}</p>
           </div>
 
-          <div className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-xs hover:shadow-md transition">
-            <div className="flex items-center justify-between text-xs">
-              <span className="font-extrabold uppercase tracking-wider text-slate-400">Scheduled Appointments</span>
-              <div className="w-10 h-10 rounded-2xl bg-sky-50 text-sky-600 flex items-center justify-center">
-                <Calendar className="w-5 h-5" />
-              </div>
-            </div>
-            <div className="mt-4 flex items-baseline gap-2">
-              <span className="text-3xl font-black text-slate-900 tracking-tight">{patientAppointments.length}</span>
-              <span className="text-xs font-bold text-sky-600 bg-sky-50 px-2 py-0.5 rounded-full">Active</span>
-            </div>
-            <p className="text-xs text-slate-400 mt-2 font-medium">Specialist consultations</p>
+          <div className="p-5 rounded-3xl bg-white border border-slate-200/80 shadow-xs space-y-1.5">
+            <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">Active Prescriptions</span>
+            <p className="text-2xl font-black text-purple-600">{prescriptions.length}</p>
+            <p className="text-[11px] text-purple-700 font-bold">3 active prescribed medications</p>
           </div>
 
-          <div className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-xs hover:shadow-md transition">
-            <div className="flex items-center justify-between text-xs">
-              <span className="font-extrabold uppercase tracking-wider text-slate-400">Active Prescriptions</span>
-              <div className="w-10 h-10 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center">
-                <Pill className="w-5 h-5" />
-              </div>
-            </div>
-            <div className="mt-4 flex items-baseline gap-2">
-              <span className="text-3xl font-black text-slate-900 tracking-tight">2</span>
-              <span className="text-xs font-bold text-purple-600 bg-purple-50 px-2 py-0.5 rounded-full">On Schedule</span>
-            </div>
-            <p className="text-xs text-slate-400 mt-2 font-medium">Amlodipine, Propranolol</p>
+          <div className="p-5 rounded-3xl bg-white border border-slate-200/80 shadow-xs space-y-1.5">
+            <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">Diagnostic Reports</span>
+            <p className="text-2xl font-black text-emerald-600">{records.uploadedDocuments?.length || 0}</p>
+            <p className="text-[11px] text-emerald-700 font-bold">All reports validated</p>
           </div>
 
-          <div className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-xs hover:shadow-md transition">
-            <div className="flex items-center justify-between text-xs">
-              <span className="font-extrabold uppercase tracking-wider text-slate-400">Lifetime Consults</span>
-              <div className="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
-                <Activity className="w-5 h-5" />
-              </div>
-            </div>
-            <div className="mt-4 flex items-baseline gap-2">
-              <span className="text-3xl font-black text-slate-900 tracking-tight">{currentPatient.totalVisits || 6}</span>
-              <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">Encounters</span>
-            </div>
-            <p className="text-xs text-slate-400 mt-2 font-medium">Logged in medical chart</p>
+          <div className="p-5 rounded-3xl bg-white border border-slate-200/80 shadow-xs space-y-1.5">
+            <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">Unread Alerts</span>
+            <p className="text-2xl font-black text-amber-600">{unreadNotifications.length}</p>
+            <Link to="/patient/notifications" className="text-[11px] text-amber-700 font-bold hover:underline">
+              View notifications →
+            </Link>
           </div>
         </div>
 
-        {/* Dual Grid: Appointments & Active Medications */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Scheduled Appointments */}
-          <div className="bg-white rounded-3xl border border-slate-200/80 p-6 sm:p-8 shadow-xs flex flex-col justify-between hover:shadow-sm transition">
-            <div>
-              <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-100">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-2xl bg-sky-50 text-sky-600 flex items-center justify-center">
-                    <Calendar className="w-5 h-5" />
+        {nextAppointment && (
+          <div className="bg-white rounded-3xl border border-sky-200/80 p-6 sm:p-8 shadow-xs relative overflow-hidden bg-gradient-to-br from-white to-sky-50/50">
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+              <div className="flex items-start sm:items-center gap-4">
+                <img
+                  src={nextAppointment.doctorAvatar}
+                  alt={nextAppointment.doctorName}
+                  className="w-16 h-16 rounded-2xl object-cover border-2 border-white shadow-md shrink-0"
+                />
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-sky-100 text-sky-800 border border-sky-200">
+                      Next Scheduled Consultation
+                    </span>
+                    <span className="text-xs font-mono font-bold text-slate-400">#{nextAppointment.appointmentNumber}</span>
                   </div>
-                  <div>
-                    <h3 className="font-extrabold text-slate-900 text-lg">My Upcoming Appointments</h3>
-                    <p className="text-xs text-slate-400">Confirmed clinic consultations</p>
-                  </div>
+                  <h3 className="text-lg font-black text-slate-900">{nextAppointment.doctorName}</h3>
+                  <p className="text-xs text-purple-700 font-bold">{nextAppointment.doctorSpecialty} • {nextAppointment.clinic}</p>
+                  <p className="text-xs text-slate-600 font-semibold flex items-center gap-2 pt-0.5">
+                    <Calendar className="w-3.5 h-3.5 text-sky-600" />
+                    <span>{nextAppointment.date} at {nextAppointment.time}</span>
+                    <span>•</span>
+                    <span className="text-emerald-600 font-bold">{nextAppointment.type} ({nextAppointment.room})</span>
+                  </p>
                 </div>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2.5">
+                <Link
+                  to="/patient/consultation"
+                  className="px-5 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold transition flex items-center gap-1.5 shadow-xs"
+                >
+                  <Video className="w-4 h-4" />
+                  <span>Join Consultation Room</span>
+                </Link>
                 <Link
                   to="/patient/appointments"
-                  className="text-xs font-bold text-sky-600 hover:text-sky-700 flex items-center gap-1 group"
+                  className="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-700 hover:bg-white text-xs font-bold transition"
                 >
-                  <span>All Visits</span>
-                  <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+                  Manage Booking
                 </Link>
               </div>
-
-              {patientAppointments.length === 0 ? (
-                <div className="text-center py-10 text-xs text-slate-400 font-medium">
-                  No scheduled doctor appointments found.
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {patientAppointments.map((apt) => (
-                    <div
-                      key={apt.id}
-                      className="p-4 rounded-2xl bg-slate-50/70 border border-slate-100 hover:bg-sky-50/40 hover:border-sky-200 transition space-y-2.5"
-                    >
-                      <div className="flex items-center justify-between">
-                        <span className="font-extrabold text-slate-900 text-sm">{apt.doctorName}</span>
-                        <span className="text-xs font-extrabold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">
-                          {apt.status}
-                        </span>
-                      </div>
-                      <p className="text-xs text-slate-600 font-medium">{apt.doctorSpecialty} • {apt.type}</p>
-                      <div className="flex items-center justify-between text-xs text-slate-400 pt-1 border-t border-slate-100">
-                        <span className="flex items-center gap-1">
-                          <Calendar className="w-3.5 h-3.5 text-slate-400" /> {apt.date}
-                        </span>
-                        <span className="flex items-center gap-1 font-bold text-slate-700">
-                          <Clock className="w-3.5 h-3.5 text-slate-400" /> {apt.time}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            <button
-              onClick={() => setIsBookModalOpen(true)}
-              className="mt-6 w-full py-3 rounded-2xl border border-dashed border-sky-300 bg-sky-50/50 hover:bg-sky-100 text-sky-700 font-extrabold text-xs flex items-center justify-center gap-2 transition"
-            >
-              <Plus className="w-4 h-4" />
-              <span>Book Another Specialist Visit</span>
-            </button>
-          </div>
-
-          {/* Active Medications Protocol */}
-          <div className="bg-white rounded-3xl border border-slate-200/80 p-6 sm:p-8 shadow-xs flex flex-col justify-between hover:shadow-sm transition">
-            <div>
-              <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-100">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center">
-                    <Pill className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <h3 className="font-extrabold text-slate-900 text-lg">Active Medications</h3>
-                    <p className="text-xs text-slate-400">Current prescription treatment plan</p>
-                  </div>
-                </div>
-                <Link
-                  to="/patient/prescriptions"
-                  className="text-xs font-bold text-purple-600 hover:text-purple-700 flex items-center gap-1 group"
-                >
-                  <span>View All Meds</span>
-                  <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
-                </Link>
-              </div>
-
-              <div className="space-y-3">
-                <div className="p-4 rounded-2xl bg-slate-50/70 border border-slate-100 space-y-1.5">
-                  <div className="flex items-center justify-between">
-                    <span className="font-extrabold text-slate-900 text-sm">Amlodipine 5mg</span>
-                    <span className="text-[11px] font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-md border border-emerald-200">
-                      Ongoing Daily
-                    </span>
-                  </div>
-                  <p className="text-xs text-slate-600 font-medium">
-                    Dosage: 1 Tablet • Every morning after breakfast
-                  </p>
-                  <p className="text-[11px] text-slate-400">Prescribed by Dr. Priya Sharma for BP control</p>
-                </div>
-
-                <div className="p-4 rounded-2xl bg-slate-50/70 border border-slate-100 space-y-1.5">
-                  <div className="flex items-center justify-between">
-                    <span className="font-bold text-slate-900 text-sm">Propranolol 10mg</span>
-                    <span className="text-[11px] font-bold text-sky-800 bg-sky-100 px-2 py-0.5 rounded-md border border-sky-200">
-                      As Needed (SOS)
-                    </span>
-                  </div>
-                  <p className="text-xs text-slate-600 font-medium">
-                    Dosage: 1 Tablet • During acute palpitations or high stress
-                  </p>
-                  <p className="text-[11px] text-slate-400">Prescribed by Dr. Priya Sharma</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="pt-4 border-t border-slate-100 mt-6 flex items-center justify-between text-xs text-slate-500 font-medium">
-              <span>Medicare Express Pharmacy Refill</span>
-              <Link to="/patient/prescriptions" className="font-extrabold text-purple-600 hover:underline">
-                Order Delivery
-              </Link>
-            </div>
-          </div>
-        </div>
-
-        {/* Most Recent Doctor Consultation Summary */}
-        {latestVisit && (
-          <div className="bg-white rounded-3xl border border-slate-200/80 p-6 sm:p-8 shadow-xs">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4 pb-3 border-b border-slate-100">
-              <div>
-                <span className="text-xs uppercase font-extrabold text-sky-600 tracking-wider">
-                  Latest Clinical Record
-                </span>
-                <h3 className="text-lg font-black text-slate-900 mt-0.5">
-                  Encounter with {latestVisit.doctorName} ({latestVisit.specialty})
-                </h3>
-              </div>
-              <span className="text-xs font-bold text-slate-500 bg-slate-100 px-3 py-1 rounded-full">
-                {latestVisit.date}
-              </span>
-            </div>
-
-            <div className="p-5 rounded-2xl bg-slate-50/80 border border-slate-100 space-y-2.5 text-xs text-slate-700">
-              <p>
-                <strong className="text-slate-900 font-extrabold">Clinical Diagnosis: </strong>
-                {latestVisit.diagnosis}
-              </p>
-              <p>
-                <strong className="text-slate-900 font-extrabold">Diagnostic Lab Results: </strong>
-                {latestVisit.labResults}
-              </p>
-              <p>
-                <strong className="text-slate-900 font-extrabold">Physician Advice: </strong>
-                "{latestVisit.notes}"
-              </p>
-            </div>
-
-            <div className="mt-4 flex justify-end">
-              <button
-                onClick={() => setIsHistoryModalOpen(true)}
-                className="text-xs font-bold text-sky-600 hover:text-sky-700 flex items-center gap-1 group"
-              >
-                <span>View Full Multi-Year Medical History</span>
-                <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
-              </button>
             </div>
           </div>
         )}
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-xs space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center font-bold">
+                  <Pill className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="font-extrabold text-slate-900 text-sm">Active Electronic Prescriptions</h3>
+                  <p className="text-[11px] text-slate-400">Current therapies and dosage instructions</p>
+                </div>
+              </div>
+              <Link to="/patient/prescriptions" className="text-xs font-bold text-purple-600 hover:underline">
+                View All ({prescriptions.length})
+              </Link>
+            </div>
+
+            <div className="space-y-2.5">
+              {prescriptions[0]?.medicines?.map((med, i) => (
+                <div
+                  key={i}
+                  className="p-3.5 rounded-2xl border border-slate-100 bg-slate-50/70 flex items-center justify-between gap-3 text-xs"
+                >
+                  <div>
+                    <p className="font-black text-slate-900">{med.name} ({med.dosage})</p>
+                    <p className="text-slate-500 text-[11px] mt-0.5">{med.instructions}</p>
+                  </div>
+                  <div className="text-right">
+                    <span className="font-mono font-bold text-purple-700 block">{med.frequency}</span>
+                    <span className="text-[10px] text-slate-400">{med.duration}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-xs space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
+                  <FolderOpen className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="font-extrabold text-slate-900 text-sm">Recent Diagnostic Reports</h3>
+                  <p className="text-[11px] text-slate-400">Validated laboratory panels & scans</p>
+                </div>
+              </div>
+              <Link to="/patient/records" className="text-xs font-bold text-emerald-600 hover:underline">
+                All Records
+              </Link>
+            </div>
+
+            <div className="space-y-2.5">
+              {records.uploadedDocuments?.slice(0, 3).map((doc) => (
+                <div
+                  key={doc.id}
+                  className="p-3.5 rounded-2xl border border-slate-100 bg-slate-50/70 flex items-center justify-between gap-3 text-xs"
+                >
+                  <div>
+                    <p className="font-extrabold text-slate-900 truncate max-w-xs">{doc.title}</p>
+                    <p className="text-slate-400 text-[11px] mt-0.5">{doc.category} • {doc.uploadDate}</p>
+                  </div>
+                  <span className="font-mono text-[10px] font-bold text-slate-500 bg-white px-2 py-1 rounded-lg border border-slate-200">
+                    {doc.fileSize}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-3xl border border-slate-200/80 p-6 sm:p-8 shadow-xs">
+          <h3 className="font-extrabold text-slate-900 text-base mb-4">Patient Portal Modules</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <Link
+              to="/patient/profile"
+              className="p-4 rounded-2xl border border-slate-100 bg-slate-50/60 hover:bg-white hover:border-sky-200 hover:shadow-xs transition group"
+            >
+              <div className="w-9 h-9 rounded-xl bg-sky-100 text-sky-700 flex items-center justify-center mb-2.5 group-hover:scale-105 transition-transform">
+                <User className="w-4 h-4" />
+              </div>
+              <h4 className="font-extrabold text-slate-900 text-xs">Profile & Demographics</h4>
+              <p className="text-[11px] text-slate-500 mt-0.5">
+                Date of birth, blood group, emergency contacts, address, photo, and verification.
+              </p>
+            </Link>
+
+            <Link
+              to="/patient/appointments"
+              className="p-4 rounded-2xl border border-slate-100 bg-slate-50/60 hover:bg-white hover:border-sky-200 hover:shadow-xs transition group"
+            >
+              <div className="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center mb-2.5 group-hover:scale-105 transition-transform">
+                <Calendar className="w-4 h-4" />
+              </div>
+              <h4 className="font-extrabold text-slate-900 text-xs">Book Appointments</h4>
+              <p className="text-[11px] text-slate-500 mt-0.5">
+                Search specialists by department, choose time slots, reschedule, and set reminders.
+              </p>
+            </Link>
+
+            <Link
+              to="/patient/consultation"
+              className="p-4 rounded-2xl border border-slate-100 bg-slate-50/60 hover:bg-white hover:border-sky-200 hover:shadow-xs transition group"
+            >
+              <div className="w-9 h-9 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center mb-2.5 group-hover:scale-105 transition-transform">
+                <Video className="w-4 h-4" />
+              </div>
+              <h4 className="font-extrabold text-slate-900 text-xs">Telehealth Consults</h4>
+              <p className="text-[11px] text-slate-500 mt-0.5">
+                Video/audio calls, doctor-patient messaging, and document sharing during visits.
+              </p>
+            </Link>
+
+            <Link
+              to="/patient/payments"
+              className="p-4 rounded-2xl border border-slate-100 bg-slate-50/60 hover:bg-white hover:border-sky-200 hover:shadow-xs transition group"
+            >
+              <div className="w-9 h-9 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center mb-2.5 group-hover:scale-105 transition-transform">
+                <CreditCard className="w-4 h-4" />
+              </div>
+              <h4 className="font-extrabold text-slate-900 text-xs">Payments & Invoices</h4>
+              <p className="text-[11px] text-slate-500 mt-0.5">
+                Pay consultation fees, download receipts, review payment history, and refund claims.
+              </p>
+            </Link>
+          </div>
+        </div>
       </div>
-
-      {/* Booking Modal */}
-      <BookAppointmentModal
-        isOpen={isBookModalOpen}
-        onClose={() => setIsBookModalOpen(false)}
-        onAppointmentBooked={(newApt) => {
-          setAppointments(getAppointments());
-        }}
-      />
-
-      {/* Patient History Modal */}
-      <PatientHistoryModal
-        patient={currentPatient}
-        isOpen={isHistoryModalOpen}
-        onClose={() => setIsHistoryModalOpen(false)}
-      />
     </PanelLayout>
   );
 }

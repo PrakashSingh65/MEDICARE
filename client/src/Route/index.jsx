@@ -4,6 +4,8 @@ import Home from "../Page/Home";
 import Login from "../Page/Login";
 import Signup from "../Page/Signup";
 import Contact from "../Page/Contact";
+import ForgotPassword from "../Page/ForgotPassword";
+import VerifyContact from "../Page/VerifyContact";
 
 import AdminDashboard from "../Page/Admin/AdminDashboard";
 import DoctorManagement from "../Page/Admin/DoctorManagement";
@@ -25,9 +27,13 @@ import DoctorPrescription from "../Page/Doctor/DoctorPrescription";
 import DoctorReports from "../Page/Doctor/DoctorReports";
 
 import PatientDashboard from "../Page/Patient/PatientDashboard";
+import PatientProfile from "../Page/Patient/PatientProfile";
 import PatientAppointments from "../Page/Patient/PatientAppointments";
 import PatientPrescriptions from "../Page/Patient/PatientPrescriptions";
 import PatientMedicalHistory from "../Page/Patient/PatientMedicalHistory";
+import PatientConsultation from "../Page/Patient/PatientConsultation";
+import PatientPayments from "../Page/Patient/PatientPayments";
+import PatientNotifications from "../Page/Patient/PatientNotifications";
 
 import ProtectedRoute from "../components/ProtectedRoute";
 
@@ -51,6 +57,14 @@ export const router = createBrowserRouter([
       {
         path: "contact",
         element: <Contact />,
+      },
+      {
+        path: "forgot-password",
+        element: <ForgotPassword />,
+      },
+      {
+        path: "verify",
+        element: <VerifyContact />,
       },
 
       {
@@ -208,6 +222,14 @@ export const router = createBrowserRouter([
         ),
       },
       {
+        path: "patient/profile",
+        element: (
+          <ProtectedRoute allowedRoles={["patient", "admin"]}>
+            <PatientProfile />
+          </ProtectedRoute>
+        ),
+      },
+      {
         path: "patient/appointments",
         element: (
           <ProtectedRoute allowedRoles={["patient", "admin"]}>
@@ -228,6 +250,38 @@ export const router = createBrowserRouter([
         element: (
           <ProtectedRoute allowedRoles={["patient", "admin"]}>
             <PatientMedicalHistory />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "patient/records",
+        element: (
+          <ProtectedRoute allowedRoles={["patient", "admin"]}>
+            <PatientMedicalHistory />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "patient/consultation",
+        element: (
+          <ProtectedRoute allowedRoles={["patient", "admin"]}>
+            <PatientConsultation />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "patient/payments",
+        element: (
+          <ProtectedRoute allowedRoles={["patient", "admin"]}>
+            <PatientPayments />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "patient/notifications",
+        element: (
+          <ProtectedRoute allowedRoles={["patient", "admin"]}>
+            <PatientNotifications />
           </ProtectedRoute>
         ),
       },
