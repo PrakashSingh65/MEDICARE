@@ -15,6 +15,11 @@ const userSchema = new Schema(
       required: true,
       trim: true,
     },
+    phone: {
+      type: String,
+      trim: true,
+      default: "",
+    },
     password: {
       type: String,
       required: true,
@@ -39,6 +44,28 @@ const userSchema = new Schema(
     isActive: {
       type: Boolean,
       default: true,
+    },
+    isEmailVerified: {
+      type: Boolean,
+      default: false,
+    },
+    isPhoneVerified: {
+      type: Boolean,
+      default: false,
+    },
+    verificationOtp: {
+      type: String,
+      default: "",
+    },
+    verificationOtpExpires: {
+      type: Date,
+    },
+    resetPasswordToken: {
+      type: String,
+      default: "",
+    },
+    resetPasswordExpires: {
+      type: Date,
     },
   },
   { timestamps: true }

@@ -13,6 +13,20 @@ const rescheduleLogSchema = new Schema(
   { _id: true }
 );
 
+const reminderItemSchema = new Schema(
+  {
+    reminderTime: { type: Date, required: true },
+    message: { type: String, default: "Upcoming medical appointment reminder" },
+    channel: {
+      type: String,
+      enum: ["in_app", "email", "sms"],
+      default: "in_app",
+    },
+    isSent: { type: Boolean, default: false },
+  },
+  { _id: true }
+);
+
 const appointmentSchema = new Schema(
   {
     patientId: { type: Schema.Types.ObjectId, ref: "Patient", required: true },
@@ -26,7 +40,7 @@ const appointmentSchema = new Schema(
     timeSlot: { type: String, required: true },
     consultationType: {
       type: String,
-      enum: ["in_clinic", "video", "chat"],
+      enum: ["in_clinic", "video", "audio", "chat"],
       default: "video",
     },
     status: {
@@ -58,6 +72,7 @@ const appointmentSchema = new Schema(
     cancelledBy: { type: String, default: "" },
     cancelledAt: { type: Date },
     rescheduleHistory: [rescheduleLogSchema],
+    reminders: [reminderItemSchema],
     issue: {
       hasIssue: { type: Boolean, default: false },
       description: { type: String, default: "" },

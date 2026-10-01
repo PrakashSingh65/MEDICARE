@@ -43,7 +43,16 @@ const notificationSchema = new Schema(
     message: { type: String, required: true, trim: true },
     type: {
       type: String,
-      enum: ["system", "appointment", "payment", "verification", "announcement"],
+      enum: [
+        "system",
+        "appointment",
+        "appointment_reminder",
+        "prescription",
+        "payment",
+        "doctor_message",
+        "verification",
+        "announcement",
+      ],
       default: "system",
     },
     recipientRole: {
@@ -52,6 +61,8 @@ const notificationSchema = new Schema(
       default: "all",
     },
     recipientId: { type: Schema.Types.ObjectId, ref: "User" },
+    patientId: { type: Schema.Types.ObjectId, ref: "Patient" },
+    doctorId: { type: Schema.Types.ObjectId, ref: "Doctor" },
     channel: {
       type: String,
       enum: ["in_app", "email", "sms", "push"],
@@ -63,6 +74,7 @@ const notificationSchema = new Schema(
       default: "sent",
     },
     isRead: { type: Boolean, default: false },
+    metadata: { type: Schema.Types.Mixed, default: {} },
     sentBy: { type: Schema.Types.ObjectId, ref: "User" },
   },
   { timestamps: true }
