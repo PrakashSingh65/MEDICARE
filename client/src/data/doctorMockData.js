@@ -1,3 +1,9 @@
+import { axiosClient } from "../api/axiosClient";
+import {
+  adaptAppointmentFromBackend,
+  adaptPrescriptionFromBackend,
+} from "../api/adapters";
+
 const STORAGE_KEYS = {
   DOCTOR_PROFILE: "medicare_doctor_profile",
   DOCTOR_SCHEDULE: "medicare_doctor_schedule",
@@ -541,10 +547,69 @@ const initialMonthlyStatistics = [
   { month: "Oct (Proj)", appointments: 64, revenue: 4800 }
 ];
 
+export const syncDoctorAppointments = async () => {
+  try {
+    const res = await axiosClient.get("/api/v1/doctor/appointments");
+    if (res.data?.data && Array.isArray(res.data.data)) {
+      const adapted = res.data.data.map(adaptAppointmentFromBackend);
+      saveDoctorAppointments(adapted);
+      return adapted;
+    }
+  } catch (err) {
+    console.warn("syncDoctorAppointments notice:", err.message);
+  }
+  return getDoctorAppointments();
+};
+
+export const syncDoctorPrescriptions = async () => {
+  try {
+    const res = await axiosClient.get("/api/v1/doctor/prescriptions");
+    if (res.data?.data && Array.isArray(res.data.data)) {
+      const adapted = res.data.data.map(adaptPrescriptionFromBackend);
+      safeSet(STORAGE_KEYS.DOCTOR_PRESCRIPTIONS, adapted);
+      return adapted;
+    }
+  } catch (err) {
+    console.warn("syncDoctorPrescriptions notice:", err.message);
+  }
+  return getDoctorPrescriptions();
+};
+
+export const syncDoctorProfile = async () => {
+  try {
+    const res = await axiosClient.get("/api/v1/doctor/profile");
+    if (res.data?.data) {
+      const doc = res.data.data;
+      const mapped = {
+        name: doc.name,
+        specialty: doc.specialty,
+        qualification: (doc.qualifications || []).map((q) => q.degree).join(", ") || "MBBS, MD",
+        experience: doc.experience || 10,
+        registrationNumber: "MCI-48291-KA",
+        email: doc.email,
+        phone: doc.phone,
+        clinicName: doc.clinicInfo?.clinicName || "Medicare Center",
+        clinicAddress: doc.clinicInfo?.address || "Bangalore",
+        consultationFee: typeof doc.fee === "number" ? `$${doc.fee}` : doc.fee || "$60",
+        bio: doc.bio || "",
+      };
+      saveDoctorProfile(mapped);
+      return mapped;
+    }
+  } catch (err) {
+    console.warn("syncDoctorProfile notice:", err.message);
+  }
+  return getDoctorProfile();
+};
+
 export const getDoctorProfile = () => safeGet(STORAGE_KEYS.DOCTOR_PROFILE, initialDoctorProfile);
 
 export const saveDoctorProfile = (profile) => {
   safeSet(STORAGE_KEYS.DOCTOR_PROFILE, profile);
+  // Dispatch to backend API
+  axiosClient.put("/api/v1/doctor/profile", profile).catch((err) =>
+    console.warn("Backend saveDoctorProfile notice:", err.message)
+  );
   return profile;
 };
 
@@ -552,6 +617,10 @@ export const getDoctorSchedule = () => safeGet(STORAGE_KEYS.DOCTOR_SCHEDULE, ini
 
 export const saveDoctorSchedule = (schedule) => {
   safeSet(STORAGE_KEYS.DOCTOR_SCHEDULE, schedule);
+  // Dispatch to backend API
+  axiosClient.put("/api/v1/doctor/schedule", schedule).catch((err) =>
+    console.warn("Backend saveDoctorSchedule notice:", err.message)
+  );
   return schedule;
 };
 
@@ -565,6 +634,12 @@ export const saveDoctorAppointments = (appointments) => {
 export const acceptAppointment = (id) => {
   const list = getDoctorAppointments();
   const updated = list.map((a) => (a.id === id ? { ...a, status: "Confirmed" } : a));
+
+  // Dispatch to backend API
+  axiosClient.patch(`/api/v1/doctor/appointments/${id}/respond`, {
+    action: "accept",
+  }).catch((err) => console.warn("Backend acceptAppointment notice:", err.message));
+
   return saveDoctorAppointments(updated);
 };
 
@@ -573,6 +648,13 @@ export const rejectAppointment = (id, reason = "Doctor unavailable / schedule co
   const updated = list.map((a) =>
     a.id === id ? { ...a, status: "Cancelled", rejectionReason: reason } : a
   );
+
+  // Dispatch to backend API
+  axiosClient.patch(`/api/v1/doctor/appointments/${id}/respond`, {
+    action: "reject",
+    reason,
+  }).catch((err) => console.warn("Backend rejectAppointment notice:", err.message));
+
   return saveDoctorAppointments(updated);
 };
 
@@ -581,6 +663,14 @@ export const rescheduleAppointment = (id, newDate, newTime) => {
   const updated = list.map((a) =>
     a.id === id ? { ...a, date: newDate, time: newTime, status: "Confirmed" } : a
   );
+
+  // Dispatch to backend API
+  axiosClient.patch(`/api/v1/doctor/appointments/${id}/reschedule`, {
+    newDate,
+    newTimeSlot: newTime,
+    reason: "Rescheduled by doctor",
+  }).catch((err) => console.warn("Backend rescheduleAppointment notice:", err.message));
+
   return saveDoctorAppointments(updated);
 };
 
@@ -619,6 +709,12 @@ export const saveDoctorPrescription = (prescription) => {
   };
   list.unshift(newPrescription);
   safeSet(STORAGE_KEYS.DOCTOR_PRESCRIPTIONS, list);
+
+  // Dispatch to backend API
+  axiosClient.post("/api/v1/doctor/prescriptions", prescription).catch((err) =>
+    console.warn("Backend saveDoctorPrescription notice:", err.message)
+  );
+
   return newPrescription;
 };
 
@@ -639,6 +735,12 @@ export const addDoctorReport = (report) => {
     fileSize: "1.8 MB"
   };
   list.unshift(newReport);
+
+  // Dispatch to backend API
+  axiosClient.post("/api/v1/doctor/reports", report).catch((err) =>
+    console.warn("Backend addDoctorReport notice:", err.message)
+  );
+
   return saveDoctorReports(list);
 };
 

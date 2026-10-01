@@ -56,6 +56,9 @@ export default function Signup() {
 
     signupMutation.mutate(formData, {
       onSuccess: (data) => {
+        if (data?.token) {
+          localStorage.setItem("medicare_token", data.token);
+        }
         if (data?.user) {
           dispatch(setCredentials(data.user));
 

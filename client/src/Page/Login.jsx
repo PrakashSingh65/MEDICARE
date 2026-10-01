@@ -18,6 +18,9 @@ export default function Login() {
       { email, password },
       {
         onSuccess: (data) => {
+          if (data?.token) {
+            localStorage.setItem("medicare_token", data.token);
+          }
           if (data?.user) {
             dispatch(setCredentials(data.user));
             if (data.user.role === "admin") {

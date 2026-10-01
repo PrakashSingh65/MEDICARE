@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
   Users,
@@ -34,26 +34,61 @@ import {
   approveDoctor,
   rejectDoctor,
   verifyDoctorDocument,
+  syncAdminDoctors,
+  syncAdminPatients,
+  syncAdminAppointments,
 } from "../../data/adminMockData";
+import { getAdminDashboardStats } from "../../api/adminApi";
 
 export default function AdminDashboard() {
   const [doctors, setDoctors] = useState(getAdminDoctors);
-  const [patients] = useState(getAdminPatients);
-  const [appointments] = useState(getAdminAppointments);
+  const [patients, setPatients] = useState(getAdminPatients);
+  const [appointments, setAppointments] = useState(getAdminAppointments);
   const [payments] = useState(getAdminPayments);
+  const [statsData, setStatsData] = useState(null);
 
-  const [selectedDoctorForVerify, setSelectedDoctorForVerify] = useState(null);
-  const [isVerifyModalOpen, setIsVerifyModalOpen] = useState(false);
+  useEffect(() => {
+    let isMounted = true;
+    getAdminDashboardStats()
+      .then((res) => {
+        if (isMounted && res?.data) {
+          setStatsData(res.data);
+        }
+      })
+      .catch((err) => console.warn("Dashboard stats live fetch notice:", err.message));
 
-  const activeDoctorsCount = doctors.filter((d) => d.status === "Active").length;
+    syncAdminDoctors()
+      .then((docs) => {
+        if (isMounted && docs) setDoctors(docs);
+      })
+      .catch(() => null);
+
+    syncAdminPatients()
+      .then((pats) => {
+        if (isMounted && pats) setPatients(pats);
+      })
+      .catch(() => null);
+
+    syncAdminAppointments()
+      .then((appts) => {
+        if (isMounted && appts) setAppointments(appts);
+      })
+      .catch(() => null);
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const activeDoctorsCount = statsData?.activeDoctors ?? doctors.filter((d) => d.status === "Active").length;
   const pendingDoctors = doctors.filter((d) => d.verificationStatus === "Pending" || d.status === "Pending");
-  const pendingDoctorsCount = pendingDoctors.length;
-  const totalDoctorsCount = doctors.length + 41;
-  const totalPatientsCount = 12840;
-  const totalAppointmentsCount = 3420;
-  const todayAppointmentsCount = 64;
-  const totalRevenue = 248500;
-  const thisMonthRevenue = 38400;
+  const pendingDoctorsCount = statsData?.pendingDoctorVerification?.pendingRegistrations ?? pendingDoctors.length;
+  const totalDoctorsCount = statsData?.totalDoctors ?? doctors.length;
+  const totalPatientsCount = statsData?.totalPatients ?? (patients.length > 0 ? patients.length : 12840);
+  const totalAppointmentsCount = statsData?.appointments?.total ?? (appointments.length > 0 ? appointments.length : 3420);
+  const todayAppointmentsCount = statsData?.appointments?.today ?? appointments.filter((a) => a.date === new Date().toISOString().split("T")[0]).length;
+  const totalRevenue = statsData?.revenue?.grossRevenue ? statsData.revenue.grossRevenue * 100 : 248500;
+  const thisMonthRevenue = statsData?.revenue?.netRevenue ? statsData.revenue.netRevenue * 100 : 38400;
 
   const platformStats = [
     { label: "Platform Growth Rate", value: "+18.4%", change: "vs last month", icon: TrendingUp, color: "text-emerald-600 bg-emerald-50 border-emerald-200" },

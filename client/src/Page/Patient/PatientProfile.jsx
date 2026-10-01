@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
   User,
@@ -20,13 +20,22 @@ import {
   Sparkles
 } from "lucide-react";
 import PanelLayout from "../../components/panels/PanelLayout";
-import { getPatientProfile, savePatientProfile } from "../../data/patientMockData";
+import { getPatientProfile, savePatientProfile, syncPatientProfile } from "../../data/patientMockData";
 
 export default function PatientProfile() {
   const [profile, setProfile] = useState(getPatientProfile);
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({ ...profile });
   const [successMessage, setSuccessMessage] = useState("");
+
+  useEffect(() => {
+    syncPatientProfile().then((data) => {
+      if (data) {
+        setProfile(data);
+        setFormData(data);
+      }
+    });
+  }, []);
   const [newAllergy, setNewAllergy] = useState("");
   const [newCondition, setNewCondition] = useState("");
 

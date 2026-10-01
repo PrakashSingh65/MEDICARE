@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Stethoscope,
   Search,
@@ -30,11 +30,22 @@ import {
   toggleDoctorStatus,
   updateDoctorInfo,
   verifyDoctorDocument,
+  syncAdminDoctors,
 } from "../../data/adminMockData";
 
 export default function DoctorManagement() {
   const [doctors, setDoctors] = useState(getAdminDoctors);
   const [searchTerm, setSearchTerm] = useState("");
+
+  useEffect(() => {
+    let active = true;
+    syncAdminDoctors().then((docs) => {
+      if (active && docs) setDoctors(docs);
+    });
+    return () => {
+      active = false;
+    };
+  }, []);
   const [selectedSpecialty, setSelectedSpecialty] = useState("All");
   const [selectedStatus, setSelectedStatus] = useState("All");
 

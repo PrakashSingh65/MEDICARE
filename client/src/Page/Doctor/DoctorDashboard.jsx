@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
   Calendar,
@@ -27,23 +27,60 @@ import {
   getMonthlyStatistics,
   acceptAppointment,
   rejectAppointment,
+  syncDoctorAppointments,
+  syncDoctorProfile,
 } from "../../data/doctorMockData";
+import { getDoctorDashboard } from "../../api/doctorApi";
 
 export default function DoctorDashboard() {
-  const [profile] = useState(getDoctorProfile);
+  const [profile, setProfile] = useState(getDoctorProfile);
   const [appointments, setAppointments] = useState(getDoctorAppointments);
-  const [patients] = useState(getDoctorPatients);
+  const [patients, setPatients] = useState(getDoctorPatients);
+  const [docDashboardData, setDocDashboardData] = useState(null);
   const monthlyStats = getMonthlyStatistics();
 
-  const todayAppointments = appointments.filter((a) => a.isToday);
-  const pendingAppointments = appointments.filter((a) => a.status === "Pending");
+  useEffect(() => {
+    let active = true;
+    getDoctorDashboard()
+      .then((res) => {
+        if (active && res?.data) {
+          setDocDashboardData(res.data);
+        }
+      })
+      .catch((err) => console.warn("Doctor dashboard live stats notice:", err.message));
+
+    syncDoctorAppointments()
+      .then((appts) => {
+        if (active && appts) setAppointments(appts);
+      })
+      .catch(() => null);
+
+    syncDoctorProfile()
+      .then((p) => {
+        if (active && p) setProfile(p);
+      })
+      .catch(() => null);
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const todayAppointments = appointments.filter(
+    (a) => a.isToday || a.date === new Date().toISOString().split("T")[0]
+  );
+  const pendingAppointments = appointments.filter((a) => a.status === "Pending" || a.status === "Scheduled");
   const completedAppointments = appointments.filter((a) => a.status === "Completed");
 
-  const totalPatients = patients.length + 137;
-  const completedCount = completedAppointments.length + 116;
-  const pendingCount = pendingAppointments.length;
-  const totalRevenue = 10650;
-  const thisMonthRevenue = 4350;
+  const totalPatients = docDashboardData?.totalPatients ?? (patients.length + 137);
+  const completedCount = docDashboardData?.completedConsultations ?? (completedAppointments.length + 116);
+  const pendingCount = docDashboardData?.pendingAppointments ?? pendingAppointments.length;
+  const totalRevenue = docDashboardData?.revenue?.grossFeeCollected
+    ? docDashboardData.revenue.grossFeeCollected * 100
+    : 10650;
+  const thisMonthRevenue = docDashboardData?.revenue?.netDoctorRevenue
+    ? docDashboardData.revenue.netDoctorRevenue * 100
+    : 4350;
 
   const handleAccept = (id) => {
     const updated = acceptAppointment(id);

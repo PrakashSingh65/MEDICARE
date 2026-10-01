@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Users,
   Search,
@@ -22,11 +22,22 @@ import PatientHistoryModal from "../../components/panels/PatientHistoryModal";
 import {
   getAdminPatients,
   togglePatientStatus,
+  syncAdminPatients,
 } from "../../data/adminMockData";
 
 export default function PatientManagement() {
   const [patients, setPatients] = useState(getAdminPatients);
   const [searchTerm, setSearchTerm] = useState("");
+
+  useEffect(() => {
+    let active = true;
+    syncAdminPatients().then((pats) => {
+      if (active && pats) setPatients(pats);
+    });
+    return () => {
+      active = false;
+    };
+  }, []);
   const [selectedPlan, setSelectedPlan] = useState("All");
   const [selectedStatus, setSelectedStatus] = useState("All");
 

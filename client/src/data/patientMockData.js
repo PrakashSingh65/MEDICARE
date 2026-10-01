@@ -1,3 +1,10 @@
+import { axiosClient } from "../api/axiosClient";
+import {
+  adaptAppointmentFromBackend,
+  adaptDoctorFromBackend,
+  adaptPrescriptionFromBackend,
+} from "../api/adapters";
+
 const STORAGE_KEYS = {
   PATIENT_PROFILE: "medicare_patient_profile",
   PATIENT_APPOINTMENTS: "medicare_patient_appointments",
@@ -6,6 +13,7 @@ const STORAGE_KEYS = {
   PATIENT_PRESCRIPTIONS: "medicare_patient_prescriptions",
   PATIENT_PAYMENTS: "medicare_patient_payments",
   PATIENT_NOTIFICATIONS: "medicare_patient_notifications",
+  AVAILABLE_DOCTORS: "medicare_available_doctors",
 };
 
 const safeGet = (key, fallback) => {
@@ -323,14 +331,127 @@ const initialPatientNotifications = [
   { id: "notif-4", category: "message", title: "Message from Dr. Priya Sharma", message: "Please log your morning blood pressure readings before our upcoming consultation tomorrow.", timestamp: "3 days ago", read: true }
 ];
 
+export const syncPatientAppointments = async () => {
+  try {
+    const [upcomingRes, historyRes] = await Promise.allSettled([
+      axiosClient.get("/api/v1/patient/appointments/upcoming"),
+      axiosClient.get("/api/v1/patient/appointments/history"),
+    ]);
+
+    const upcomingData =
+      upcomingRes.status === "fulfilled" && Array.isArray(upcomingRes.value.data?.data)
+        ? upcomingRes.value.data.data.map(adaptAppointmentFromBackend)
+        : [];
+
+    const historyData =
+      historyRes.status === "fulfilled" && Array.isArray(historyRes.value.data?.data)
+        ? historyRes.value.data.data.map(adaptAppointmentFromBackend)
+        : [];
+
+    const combinedMap = new Map();
+    [...upcomingData, ...historyData].forEach((apt) => {
+      if (apt && apt.id) combinedMap.set(apt.id, apt);
+    });
+
+    if (combinedMap.size > 0) {
+      const combined = Array.from(combinedMap.values());
+      savePatientAppointments(combined);
+      return combined;
+    }
+  } catch (err) {
+    console.warn("syncPatientAppointments notice:", err.message);
+  }
+  return getPatientAppointments();
+};
+
+export const syncPatientPrescriptions = async () => {
+  try {
+    const res = await axiosClient.get("/api/v1/patient/prescriptions");
+    if (res.data?.data && Array.isArray(res.data.data)) {
+      const adapted = res.data.data.map(adaptPrescriptionFromBackend);
+      savePatientPrescriptions(adapted);
+      return adapted;
+    }
+  } catch (err) {
+    console.warn("syncPatientPrescriptions notice:", err.message);
+  }
+  return getPatientPrescriptions();
+};
+
+export const syncPatientDoctors = async () => {
+  try {
+    const res = await axiosClient.get("/api/v1/patient/doctors");
+    if (res.data?.data && Array.isArray(res.data.data)) {
+      const adapted = res.data.data.map(adaptDoctorFromBackend);
+      safeSet(STORAGE_KEYS.AVAILABLE_DOCTORS, adapted);
+      return adapted;
+    }
+  } catch (err) {
+    console.warn("syncPatientDoctors notice:", err.message);
+  }
+  return getAvailableDoctors();
+};
+
+export const syncPatientNotifications = async () => {
+  try {
+    const res = await axiosClient.get("/api/v1/patient/notifications");
+    if (res.data?.data && Array.isArray(res.data.data)) {
+      const mapped = res.data.data.map((n) => ({
+        id: String(n._id || n.id),
+        category: n.type || "reminder",
+        title: n.title,
+        message: n.message,
+        timestamp: "Recently",
+        read: Boolean(n.isRead),
+      }));
+      savePatientNotifications(mapped);
+      return mapped;
+    }
+  } catch (err) {
+    console.warn("syncPatientNotifications notice:", err.message);
+  }
+  return getPatientNotifications();
+};
+
+export const syncPatientProfile = async () => {
+  try {
+    const res = await axiosClient.get("/api/v1/patient/profile");
+    if (res.data?.data) {
+      const pat = res.data.data;
+      const current = getPatientProfile();
+      const updated = {
+        ...current,
+        name: pat.name || current.name,
+        email: pat.email || current.email,
+        phone: pat.phone || current.phone,
+        gender: pat.gender || current.gender,
+        bloodGroup: pat.bloodGroup || current.bloodGroup,
+        age: Number(pat.age) || current.age,
+        address: pat.address || current.address,
+        allergies: Array.isArray(pat.allergies) && pat.allergies.length > 0 ? pat.allergies : current.allergies,
+        medicalConditions: Array.isArray(pat.medicalConditions) && pat.medicalConditions.length > 0 ? pat.medicalConditions : current.medicalConditions,
+      };
+      safeSet(STORAGE_KEYS.PATIENT_PROFILE, updated);
+      return updated;
+    }
+  } catch (err) {
+    console.warn("syncPatientProfile notice:", err.message);
+  }
+  return getPatientProfile();
+};
+
 export const getPatientProfile = () => safeGet(STORAGE_KEYS.PATIENT_PROFILE, initialPatientProfile);
 
 export const savePatientProfile = (profile) => {
   safeSet(STORAGE_KEYS.PATIENT_PROFILE, profile);
+  // Dispatch to backend API
+  axiosClient.put("/api/v1/patient/profile", profile).catch((err) =>
+    console.warn("Backend savePatientProfile notice:", err.message)
+  );
   return profile;
 };
 
-export const getAvailableDoctors = () => initialAvailableDoctors;
+export const getAvailableDoctors = () => safeGet(STORAGE_KEYS.AVAILABLE_DOCTORS, initialAvailableDoctors);
 
 export const getPatientAppointments = () => safeGet(STORAGE_KEYS.PATIENT_APPOINTMENTS, initialPatientAppointments);
 
@@ -341,9 +462,10 @@ export const savePatientAppointments = (appointments) => {
 
 export const bookPatientAppointment = (booking) => {
   const list = getPatientAppointments();
+  const tempId = `papt-${Date.now()}`;
   const newAppointment = {
     ...booking,
-    id: `papt-${Date.now()}`,
+    id: tempId,
     appointmentNumber: `APT-${Math.floor(10000 + Math.random() * 90000)}`,
     status: "Confirmed",
     reminderSet: true,
@@ -363,6 +485,24 @@ export const bookPatientAppointment = (booking) => {
   };
   savePatientNotifications([newNotif, ...notifs]);
 
+  // Dispatch to backend API
+  if (booking.doctorId) {
+    axiosClient.post("/api/v1/patient/appointments", {
+      doctorId: booking.doctorId,
+      appointmentDate: booking.date,
+      timeSlot: booking.time,
+      consultationType: booking.type?.toLowerCase().includes("video") ? "video" : "in_clinic",
+      reasonForVisit: booking.symptoms || booking.reason || "General consultation",
+    }).then((res) => {
+      if (res.data?.data) {
+        const realApt = adaptAppointmentFromBackend(res.data.data);
+        const currentList = getPatientAppointments();
+        const replaced = currentList.map((a) => (a.id === tempId ? realApt : a));
+        savePatientAppointments(replaced);
+      }
+    }).catch((err) => console.warn("Backend bookPatientAppointment notice:", err.message));
+  }
+
   return newAppointment;
 };
 
@@ -371,6 +511,12 @@ export const cancelPatientAppointment = (id, reason = "Cancelled by patient") =>
   const updated = list.map((a) =>
     a.id === id ? { ...a, status: "Cancelled", isUpcoming: false, cancelReason: reason } : a
   );
+
+  // Dispatch to backend API
+  axiosClient.patch(`/api/v1/patient/appointments/${id}/cancel`, {
+    cancellationReason: reason,
+  }).catch((err) => console.warn("Backend cancelPatientAppointment notice:", err.message));
+
   return savePatientAppointments(updated);
 };
 
@@ -379,6 +525,14 @@ export const reschedulePatientAppointment = (id, newDate, newTime) => {
   const updated = list.map((a) =>
     a.id === id ? { ...a, date: newDate, time: newTime, status: "Confirmed" } : a
   );
+
+  // Dispatch to backend API
+  axiosClient.patch(`/api/v1/patient/appointments/${id}/reschedule`, {
+    newDate,
+    newTimeSlot: newTime,
+    reason: "Rescheduled by patient",
+  }).catch((err) => console.warn("Backend reschedulePatientAppointment notice:", err.message));
+
   return savePatientAppointments(updated);
 };
 
@@ -429,6 +583,12 @@ export const addConsultationChatMessage = (consultationId, message) => {
       chatMessages: [...(c.chatMessages || []), message]
     };
   });
+
+  // Dispatch to backend API
+  axiosClient.post(`/api/v1/patient/consultations/${consultationId}/messages`, {
+    message: typeof message === "string" ? message : message.text || message.message,
+  }).catch((err) => console.warn("Backend consultation message notice:", err.message));
+
   return savePatientConsultations(updated);
 };
 
@@ -474,6 +634,13 @@ export const makePatientPayment = (paymentData) => {
   };
   savePatientNotifications([newNotif, ...notifs]);
 
+  // Dispatch to backend API
+  axiosClient.post("/api/v1/patient/payments/checkout", {
+    amount: paymentData.amount,
+    doctorId: paymentData.doctorId,
+    paymentMethod: paymentData.paymentMethod || "upi",
+  }).catch((err) => console.warn("Backend payment checkout notice:", err.message));
+
   return newTx;
 };
 
@@ -487,11 +654,19 @@ export const savePatientNotifications = (notifications) => {
 export const markNotificationAsRead = (id) => {
   const list = getPatientNotifications();
   const updated = list.map((n) => (n.id === id ? { ...n, read: true } : n));
+
+  // Dispatch to backend API
+  axiosClient.patch(`/api/v1/patient/notifications/${id}/read`).catch(() => null);
+
   return savePatientNotifications(updated);
 };
 
 export const markAllNotificationsAsRead = () => {
   const list = getPatientNotifications();
   const updated = list.map((n) => ({ ...n, read: true }));
+
+  // Dispatch to backend API
+  axiosClient.patch("/api/v1/patient/notifications/read-all").catch(() => null);
+
   return savePatientNotifications(updated);
 };

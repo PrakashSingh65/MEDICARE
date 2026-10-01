@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
   Calendar,
@@ -25,6 +25,7 @@ import {
   acceptAppointment,
   rejectAppointment,
   rescheduleAppointment,
+  syncDoctorAppointments,
 } from "../../data/doctorMockData";
 
 export default function DoctorAppointments() {
@@ -39,6 +40,14 @@ export default function DoctorAppointments() {
 
   const [selectedPatientForDetails, setSelectedPatientForDetails] = useState(null);
   const [isPatientDetailsOpen, setIsPatientDetailsOpen] = useState(false);
+
+  useEffect(() => {
+    syncDoctorAppointments().then((data) => {
+      if (data && Array.isArray(data)) {
+        setAppointments(data);
+      }
+    });
+  }, []);
 
   const handleAccept = (id) => {
     const updated = acceptAppointment(id);

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
   Pill,
@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import PanelLayout from "../../components/panels/PanelLayout";
 import PrescriptionPreviewModal from "../../components/panels/PrescriptionPreviewModal";
-import { getPatientPrescriptions } from "../../data/patientMockData";
+import { getPatientPrescriptions, syncPatientPrescriptions } from "../../data/patientMockData";
 
 export default function PatientPrescriptions() {
   const [prescriptions, setPrescriptions] = useState(getPatientPrescriptions);
@@ -27,6 +27,14 @@ export default function PatientPrescriptions() {
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [refillNotice, setRefillNotice] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+
+  useEffect(() => {
+    syncPatientPrescriptions().then((data) => {
+      if (data && Array.isArray(data)) {
+        setPrescriptions(data);
+      }
+    });
+  }, []);
 
   const activePrescriptions = prescriptions.filter((rx) => rx.status === "Active");
   const pastPrescriptions = prescriptions.filter((rx) => rx.status !== "Active");

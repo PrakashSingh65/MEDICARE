@@ -38,10 +38,11 @@ export const getUpcomingAppointments = async (req, res) => {
       return res.status(404).json({ success: false, message: "Doctor profile not found" });
     }
 
-    const now = new Date();
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
     const appointments = await Appointment.find({
       doctorId: doctor._id,
-      appointmentDate: { $gte: now },
+      appointmentDate: { $gte: startOfDay },
       status: { $in: ["pending", "scheduled", "confirmed", "accepted", "rescheduled"] },
     }).sort({ appointmentDate: 1, timeSlot: 1 });
 

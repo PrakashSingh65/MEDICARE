@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Stethoscope,
   ShieldCheck,
@@ -17,13 +17,22 @@ import {
   Sparkles,
 } from "lucide-react";
 import PanelLayout from "../../components/panels/PanelLayout";
-import { getDoctorProfile, saveDoctorProfile } from "../../data/doctorMockData";
+import { getDoctorProfile, saveDoctorProfile, syncDoctorProfile } from "../../data/doctorMockData";
 
 export default function DoctorProfile() {
   const [profile, setProfile] = useState(getDoctorProfile);
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({ ...profile });
   const [savedSuccess, setSavedSuccess] = useState(false);
+
+  useEffect(() => {
+    syncDoctorProfile().then((data) => {
+      if (data) {
+        setProfile(data);
+        setFormData(data);
+      }
+    });
+  }, []);
 
   const handleSave = (e) => {
     e.preventDefault();

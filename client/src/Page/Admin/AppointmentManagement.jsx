@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Calendar,
   Search,
@@ -23,11 +23,22 @@ import {
   getAdminAppointments,
   cancelAdminAppointment,
   resolveAppointmentIssue,
+  syncAdminAppointments,
 } from "../../data/adminMockData";
 
 export default function AppointmentManagement() {
   const [appointments, setAppointments] = useState(getAdminAppointments);
   const [searchTerm, setSearchTerm] = useState("");
+
+  useEffect(() => {
+    let active = true;
+    syncAdminAppointments().then((appts) => {
+      if (active && appts) setAppointments(appts);
+    });
+    return () => {
+      active = false;
+    };
+  }, []);
   const [selectedDoctorFilter, setSelectedDoctorFilter] = useState("All");
   const [selectedStatusFilter, setSelectedStatusFilter] = useState("All");
   const [selectedDateFilter, setSelectedDateFilter] = useState("");

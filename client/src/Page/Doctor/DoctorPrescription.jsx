@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Pill,
   Plus,
@@ -18,12 +18,21 @@ import {
   getDoctorPatients,
   getDoctorPrescriptions,
   saveDoctorPrescription,
+  syncDoctorPrescriptions,
 } from "../../data/doctorMockData";
 
 export default function DoctorPrescription() {
   const patients = getDoctorPatients();
   const [prescriptions, setPrescriptions] = useState(getDoctorPrescriptions);
   const [activeTab, setActiveTab] = useState("create");
+
+  useEffect(() => {
+    syncDoctorPrescriptions().then((data) => {
+      if (data && Array.isArray(data)) {
+        setPrescriptions(data);
+      }
+    });
+  }, []);
 
   const [selectedPatientId, setSelectedPatientId] = useState(patients[0]?.id || "pat-1");
   const [diagnosis, setDiagnosis] = useState("Stage 1 Essential Hypertension with mild autonomic anxiety");

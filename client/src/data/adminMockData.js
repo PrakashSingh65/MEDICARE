@@ -1,3 +1,10 @@
+import { axiosClient } from "../api/axiosClient";
+import {
+  adaptDoctorFromBackend,
+  adaptPatientFromBackend,
+  adaptAppointmentFromBackend,
+} from "../api/adapters";
+
 const STORAGE_KEYS = {
   ADMIN_DOCTORS: "medicare_admin_doctors",
   ADMIN_PATIENTS: "medicare_admin_patients",
@@ -588,6 +595,48 @@ const initialAdminSystem = {
   ]
 };
 
+export const syncAdminDoctors = async () => {
+  try {
+    const res = await axiosClient.get("/api/v1/admin/doctors");
+    if (res.data?.data && Array.isArray(res.data.data)) {
+      const adapted = res.data.data.map(adaptDoctorFromBackend);
+      saveAdminDoctors(adapted);
+      return adapted;
+    }
+  } catch (err) {
+    console.warn("syncAdminDoctors notice:", err.message);
+  }
+  return getAdminDoctors();
+};
+
+export const syncAdminPatients = async () => {
+  try {
+    const res = await axiosClient.get("/api/v1/admin/patients");
+    if (res.data?.data && Array.isArray(res.data.data)) {
+      const adapted = res.data.data.map(adaptPatientFromBackend);
+      saveAdminPatients(adapted);
+      return adapted;
+    }
+  } catch (err) {
+    console.warn("syncAdminPatients notice:", err.message);
+  }
+  return getAdminPatients();
+};
+
+export const syncAdminAppointments = async () => {
+  try {
+    const res = await axiosClient.get("/api/v1/admin/appointments");
+    if (res.data?.data && Array.isArray(res.data.data)) {
+      const adapted = res.data.data.map(adaptAppointmentFromBackend);
+      saveAdminAppointments(adapted);
+      return adapted;
+    }
+  } catch (err) {
+    console.warn("syncAdminAppointments notice:", err.message);
+  }
+  return getAdminAppointments();
+};
+
 export const getAdminDoctors = () => safeGet(STORAGE_KEYS.ADMIN_DOCTORS, initialAdminDoctors);
 
 export const saveAdminDoctors = (doctors) => {
@@ -600,6 +649,11 @@ export const approveDoctor = (id) => {
   const updated = list.map((doc) =>
     doc.id === id ? { ...doc, status: "Active", verificationStatus: "Verified" } : doc
   );
+  // Dispatch to backend API
+  axiosClient.patch(`/api/v1/admin/doctors/${id}/registration`, {
+    status: "approved",
+  }).catch((err) => console.warn("Backend approveDoctor notice:", err.message));
+
   return saveAdminDoctors(updated);
 };
 
@@ -608,6 +662,12 @@ export const rejectDoctor = (id, reason = "Credentials could not be verified") =
   const updated = list.map((doc) =>
     doc.id === id ? { ...doc, status: "Rejected", verificationStatus: "Rejected", rejectionReason: reason } : doc
   );
+  // Dispatch to backend API
+  axiosClient.patch(`/api/v1/admin/doctors/${id}/registration`, {
+    status: "rejected",
+    rejectionReason: reason,
+  }).catch((err) => console.warn("Backend rejectDoctor notice:", err.message));
+
   return saveAdminDoctors(updated);
 };
 
@@ -616,6 +676,11 @@ export const toggleDoctorStatus = (id, nextStatus) => {
   const updated = list.map((doc) =>
     doc.id === id ? { ...doc, status: nextStatus } : doc
   );
+  // Dispatch to backend API
+  axiosClient.patch(`/api/v1/admin/doctors/${id}/status`, {
+    accountStatus: nextStatus.toLowerCase(),
+  }).catch((err) => console.warn("Backend toggleDoctorStatus notice:", err.message));
+
   return saveAdminDoctors(updated);
 };
 
@@ -624,6 +689,11 @@ export const updateDoctorInfo = (id, fields) => {
   const updated = list.map((doc) =>
     doc.id === id ? { ...doc, ...fields } : doc
   );
+  // Dispatch to backend API
+  axiosClient.put(`/api/v1/admin/doctors/${id}`, fields).catch((err) =>
+    console.warn("Backend updateDoctorInfo notice:", err.message)
+  );
+
   return saveAdminDoctors(updated);
 };
 
@@ -641,6 +711,11 @@ export const verifyDoctorDocument = (docId, documentId) => {
       verificationStatus: allVerified ? "Verified" : "Pending"
     };
   });
+  // Dispatch to backend API
+  axiosClient.patch(`/api/v1/admin/doctors/${docId}/verify-qualifications`, {
+    isQualifiedVerified: true,
+  }).catch((err) => console.warn("Backend verifyDoctorDocument notice:", err.message));
+
   return saveAdminDoctors(updated);
 };
 
@@ -653,9 +728,11 @@ export const saveAdminPatients = (patients) => {
 
 export const togglePatientStatus = (id) => {
   const list = getAdminPatients();
+  const target = list.find((p) => p.id === id);
+  const nextStatus = target?.status === "Active" ? "Deactivated" : "Active";
+
   const updated = list.map((pat) => {
     if (pat.id !== id) return pat;
-    const nextStatus = pat.status === "Active" ? "Deactivated" : "Active";
     const newLog = {
       id: `act-${Date.now()}`,
       type: "profile_update",
@@ -670,6 +747,12 @@ export const togglePatientStatus = (id) => {
       activityLog: [newLog, ...(pat.activityLog || [])]
     };
   });
+
+  // Dispatch to backend API
+  axiosClient.patch(`/api/v1/admin/patients/${id}/status`, {
+    accountStatus: nextStatus.toLowerCase(),
+  }).catch((err) => console.warn("Backend togglePatientStatus notice:", err.message));
+
   return saveAdminPatients(updated);
 };
 
@@ -680,15 +763,21 @@ export const saveAdminAppointments = (appointments) => {
   return appointments;
 };
 
-export const cancelAdminAppointment = (id, reason) => {
+export const cancelAdminAppointment = (id, reason = "Cancelled by administrator") => {
   const list = getAdminAppointments();
   const updated = list.map((apt) =>
     apt.id === id ? { ...apt, status: "Cancelled", cancelReason: reason } : apt
   );
+
+  // Dispatch to backend API
+  axiosClient.patch(`/api/v1/admin/appointments/${id}/cancel`, {
+    cancellationReason: reason,
+  }).catch((err) => console.warn("Backend cancelAdminAppointment notice:", err.message));
+
   return saveAdminAppointments(updated);
 };
 
-export const resolveAppointmentIssue = (id, notes) => {
+export const resolveAppointmentIssue = (id, notes = "") => {
   const list = getAdminAppointments();
   const updated = list.map((apt) => {
     if (apt.id !== id) return apt;
@@ -700,6 +789,12 @@ export const resolveAppointmentIssue = (id, notes) => {
         : null
     };
   });
+
+  // Dispatch to backend API
+  axiosClient.patch(`/api/v1/admin/appointments/${id}/resolve-issue`, {
+    notes,
+  }).catch((err) => console.warn("Backend resolveAppointmentIssue notice:", err.message));
+
   return saveAdminAppointments(updated);
 };
 
@@ -716,6 +811,12 @@ export const processAdminRefund = (refundId, status = "Approved") => {
     r.id === refundId ? { ...r, status, processedDate: new Date().toISOString().substring(0, 10) } : r
   );
   const updated = { ...data, refunds: updatedRefunds };
+
+  // Dispatch to backend API
+  axiosClient.post(`/api/v1/admin/payments/transactions/${refundId}/refund`, {
+    refundReason: "Approved by administrator",
+  }).catch((err) => console.warn("Backend processAdminRefund notice:", err.message));
+
   return saveAdminPayments(updated);
 };
 
@@ -725,15 +826,29 @@ export const resolveFailedPayment = (id) => {
     f.id === id ? { ...f, status: "Resolved" } : f
   );
   const updated = { ...data, failedPayments: updatedFailed };
+
+  // Dispatch to backend API
+  axiosClient.patch(`/api/v1/admin/payments/transactions/${id}/status`, {
+    status: "completed",
+  }).catch((err) => console.warn("Backend resolveFailedPayment notice:", err.message));
+
   return saveAdminPayments(updated);
 };
 
 export const executePayout = (payoutId) => {
   const data = getAdminPayments();
   const updatedPayouts = data.doctorPayouts.map((p) =>
-    p.id === payoutId ? { ...p, status: "Paid", payoutDate: new Date().toISOString().substring(0, 10) } : p
+    p.id === payoutId
+      ? { ...p, status: "Paid", executionDate: new Date().toISOString().substring(0, 10), reference: `HDFC-RTGS-${Date.now().toString().slice(-6)}` }
+      : p
   );
   const updated = { ...data, doctorPayouts: updatedPayouts };
+
+  // Dispatch to backend API
+  axiosClient.patch(`/api/v1/admin/payments/payouts/${payoutId}/status`, {
+    status: "paid",
+  }).catch((err) => console.warn("Backend executePayout notice:", err.message));
+
   return saveAdminPayments(updated);
 };
 

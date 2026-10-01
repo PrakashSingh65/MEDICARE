@@ -145,6 +145,7 @@ const Navbar = () => {
   const handleLogout = () => {
     logoutMutate(undefined, {
       onSettled: () => {
+        localStorage.removeItem("medicare_token");
         dispatch(logout());
         navigate("/login");
       },

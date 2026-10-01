@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
   Bell,
@@ -18,12 +18,21 @@ import PanelLayout from "../../components/panels/PanelLayout";
 import {
   getPatientNotifications,
   markNotificationAsRead,
-  markAllNotificationsAsRead
+  markAllNotificationsAsRead,
+  syncPatientNotifications,
 } from "../../data/patientMockData";
 
 export default function PatientNotifications() {
   const [notifications, setNotifications] = useState(getPatientNotifications);
   const [selectedCategory, setSelectedCategory] = useState("all");
+
+  useEffect(() => {
+    syncPatientNotifications().then((data) => {
+      if (data && Array.isArray(data)) {
+        setNotifications(data);
+      }
+    });
+  }, []);
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 

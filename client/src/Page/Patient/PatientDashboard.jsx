@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
   Calendar,
@@ -29,14 +29,29 @@ import {
   getPatientRecords,
   getPatientPrescriptions,
   getPatientNotifications,
+  syncPatientAppointments,
+  syncPatientPrescriptions,
+  syncPatientNotifications,
 } from "../../data/patientMockData";
 
 export default function PatientDashboard() {
-  const profile = getPatientProfile();
-  const appointments = getPatientAppointments();
-  const records = getPatientRecords();
-  const prescriptions = getPatientPrescriptions();
-  const notifications = getPatientNotifications();
+  const [profile] = useState(getPatientProfile);
+  const [appointments, setAppointments] = useState(getPatientAppointments);
+  const [records] = useState(getPatientRecords);
+  const [prescriptions, setPrescriptions] = useState(getPatientPrescriptions);
+  const [notifications, setNotifications] = useState(getPatientNotifications);
+
+  useEffect(() => {
+    syncPatientAppointments().then((data) => {
+      if (data && Array.isArray(data)) setAppointments(data);
+    });
+    syncPatientPrescriptions().then((data) => {
+      if (data && Array.isArray(data)) setPrescriptions(data);
+    });
+    syncPatientNotifications().then((data) => {
+      if (data && Array.isArray(data)) setNotifications(data);
+    });
+  }, []);
 
   const upcomingAppointments = appointments.filter((a) => a.isUpcoming && a.status === "Confirmed");
   const nextAppointment = upcomingAppointments[0];

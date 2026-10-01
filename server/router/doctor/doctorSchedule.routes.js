@@ -10,6 +10,7 @@ import {
 const router = express.Router();
 
 router.get("/", getSchedule);
+router.put("/", updateWorkingSchedule);
 router.put("/working-hours", updateWorkingSchedule);
 router.post("/slots", createAppointmentSlots);
 router.post("/block-date", blockUnavailableDate);

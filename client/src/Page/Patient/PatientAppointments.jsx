@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
   Calendar,
@@ -32,12 +32,23 @@ import {
   getPatientAppointments,
   cancelPatientAppointment,
   reschedulePatientAppointment,
-  toggleAppointmentReminder
+  toggleAppointmentReminder,
+  syncPatientAppointments,
+  syncPatientDoctors,
 } from "../../data/patientMockData";
 
 export default function PatientAppointments() {
   const [appointments, setAppointments] = useState(getPatientAppointments);
-  const doctors = getAvailableDoctors();
+  const [doctors, setDoctors] = useState(getAvailableDoctors);
+
+  useEffect(() => {
+    syncPatientAppointments().then((data) => {
+      if (data && Array.isArray(data)) setAppointments(data);
+    });
+    syncPatientDoctors().then((data) => {
+      if (data && Array.isArray(data)) setDoctors(data);
+    });
+  }, []);
 
   const [activeTab, setActiveTab] = useState("upcoming");
   const [searchSpecialty, setSearchSpecialty] = useState("");
@@ -127,6 +138,9 @@ export default function PatientAppointments() {
 
   const handleAppointmentBooked = () => {
     setAppointments(getPatientAppointments());
+    syncPatientAppointments().then((data) => {
+      if (data && Array.isArray(data)) setAppointments(data);
+    });
   };
 
   return (

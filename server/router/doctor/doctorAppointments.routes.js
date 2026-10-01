@@ -10,6 +10,7 @@ import {
 
 const router = express.Router();
 
+router.get("/", getAppointmentHistory);
 router.get("/today", getTodayAppointments);
 router.get("/upcoming", getUpcomingAppointments);
 router.get("/history", getAppointmentHistory);

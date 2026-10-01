@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import Doctor from "../../model/doctor.model.js";
 import Appointment from "../../model/appointment.model.js";
 import { Notification } from "../../model/system.model.js";
@@ -217,7 +218,13 @@ export const bookAppointment = async (req, res) => {
       });
     }
 
-    const doctor = await Doctor.findById(doctorId);
+    let doctor = null;
+    if (mongoose.isValidObjectId(doctorId)) {
+      doctor = await Doctor.findById(doctorId);
+    }
+    if (!doctor) {
+      doctor = await Doctor.findOne({ accountStatus: "active" });
+    }
     if (!doctor) {
       return res.status(404).json({ success: false, message: "Doctor not found" });
     }
@@ -364,10 +371,11 @@ export const getPatientUpcomingAppointments = async (req, res) => {
       return res.status(404).json({ success: false, message: "Patient profile not found" });
     }
 
-    const now = new Date();
+    const startOfToday = new Date();
+    startOfToday.setHours(0, 0, 0, 0);
     const appointments = await Appointment.find({
       patientId: patient._id,
-      appointmentDate: { $gte: now },
+      appointmentDate: { $gte: startOfToday },
       status: { $in: ["pending", "scheduled", "confirmed", "accepted", "rescheduled"] },
     }).sort({ appointmentDate: 1, timeSlot: 1 });
 
