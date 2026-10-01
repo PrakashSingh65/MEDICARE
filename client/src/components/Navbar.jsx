@@ -20,6 +20,10 @@ import {
   CreditCard,
   Layers,
   Settings,
+  Video,
+  Sliders,
+  FolderOpen,
+  UserCheck,
 } from "lucide-react";
 import { useLogout, useCheckAuth } from "../api/authApi";
 import { logout, setCredentials, selectCurrentUser } from "../redux/authSlice";
@@ -63,9 +67,13 @@ const roleConfig = {
     links: [
       { label: "Home", path: "/", icon: Home, exact: true },
       { label: "Dashboard", path: "/doctor", icon: Activity, exact: true },
+      { label: "Profile", path: "/doctor/profile", icon: UserCheck },
+      { label: "Schedule", path: "/doctor/schedule", icon: Sliders },
       { label: "Appointments", path: "/doctor/appointments", icon: Calendar },
       { label: "Patients", path: "/doctor/patients", icon: Users },
-      { label: "Help", path: "/contact", icon: PhoneCall },
+      { label: "Consultation", path: "/doctor/consultation", icon: Video },
+      { label: "Prescriptions", path: "/doctor/prescriptions", icon: Pill },
+      { label: "Reports", path: "/doctor/reports", icon: FolderOpen },
     ],
   },
   patient: {

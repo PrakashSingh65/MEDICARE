@@ -16,8 +16,13 @@ import MedicineList from "../Page/Admin/MedicineList";
 import RevenueGrowth from "../Page/Admin/RevenueGrowth";
 
 import DoctorDashboard from "../Page/Doctor/DoctorDashboard";
+import DoctorProfile from "../Page/Doctor/DoctorProfile";
+import DoctorSchedule from "../Page/Doctor/DoctorSchedule";
 import DoctorAppointments from "../Page/Doctor/DoctorAppointments";
 import DoctorPatients from "../Page/Doctor/DoctorPatients";
+import DoctorConsultation from "../Page/Doctor/DoctorConsultation";
+import DoctorPrescription from "../Page/Doctor/DoctorPrescription";
+import DoctorReports from "../Page/Doctor/DoctorReports";
 
 import PatientDashboard from "../Page/Patient/PatientDashboard";
 import PatientAppointments from "../Page/Patient/PatientAppointments";
@@ -138,6 +143,22 @@ export const router = createBrowserRouter([
         ),
       },
       {
+        path: "doctor/profile",
+        element: (
+          <ProtectedRoute allowedRoles={["doctor", "admin"]}>
+            <DoctorProfile />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "doctor/schedule",
+        element: (
+          <ProtectedRoute allowedRoles={["doctor", "admin"]}>
+            <DoctorSchedule />
+          </ProtectedRoute>
+        ),
+      },
+      {
         path: "doctor/appointments",
         element: (
           <ProtectedRoute allowedRoles={["doctor", "admin"]}>
@@ -150,6 +171,30 @@ export const router = createBrowserRouter([
         element: (
           <ProtectedRoute allowedRoles={["doctor", "admin"]}>
             <DoctorPatients />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "doctor/consultation",
+        element: (
+          <ProtectedRoute allowedRoles={["doctor", "admin"]}>
+            <DoctorConsultation />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "doctor/prescriptions",
+        element: (
+          <ProtectedRoute allowedRoles={["doctor", "admin"]}>
+            <DoctorPrescription />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "doctor/reports",
+        element: (
+          <ProtectedRoute allowedRoles={["doctor", "admin"]}>
+            <DoctorReports />
           </ProtectedRoute>
         ),
       },

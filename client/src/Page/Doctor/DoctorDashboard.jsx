@@ -1,288 +1,306 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { useSelector } from "react-redux";
-import { selectCurrentUser } from "../../redux/authSlice";
 import {
-  Stethoscope,
   Calendar,
   Users,
+  CheckCircle2,
   Clock,
-  CheckCircle,
-  FileText,
   DollarSign,
-  Star,
-  Plus,
-  Eye,
+  TrendingUp,
   Activity,
+  Video,
+  FileText,
+  Pill,
+  ShieldCheck,
+  Building,
   ArrowRight,
+  Star,
   Sparkles,
-  MapPin,
-  HeartPulse,
+  Sliders,
+  FolderOpen,
 } from "lucide-react";
 import PanelLayout from "../../components/panels/PanelLayout";
-import PrescriptionModal from "../../components/panels/PrescriptionModal";
-import PatientHistoryModal from "../../components/panels/PatientHistoryModal";
-import DoctorHistoryModal from "../../components/panels/DoctorHistoryModal";
 import {
-  getDoctors,
-  getPatients,
-  getAppointments,
-  updateAppointmentStatus,
-} from "../../data/mockData";
+  getDoctorProfile,
+  getDoctorAppointments,
+  getDoctorPatients,
+  getMonthlyStatistics,
+  acceptAppointment,
+  rejectAppointment,
+} from "../../data/doctorMockData";
 
 export default function DoctorDashboard() {
-  const user = useSelector(selectCurrentUser);
-  const doctors = getDoctors();
-  const matchedDoctor =
-    doctors.find(
-      (d) =>
-        (user?.email && d.email?.toLowerCase() === user.email.toLowerCase()) ||
-        (user?.username && d.name?.toLowerCase() === user.username.toLowerCase())
-    ) || doctors[0];
+  const [profile] = useState(getDoctorProfile);
+  const [appointments, setAppointments] = useState(getDoctorAppointments);
+  const [patients] = useState(getDoctorPatients);
+  const monthlyStats = getMonthlyStatistics();
 
-  const currentDoctor = {
-    ...matchedDoctor,
-    name: user?.username || matchedDoctor.name,
-    avatar: user?.imageUrl || matchedDoctor.avatar,
-  };
-  const [appointments, setAppointments] = useState(getAppointments);
-  const patients = getPatients();
+  const todayAppointments = appointments.filter((a) => a.isToday);
+  const pendingAppointments = appointments.filter((a) => a.status === "Pending");
+  const completedAppointments = appointments.filter((a) => a.status === "Completed");
 
-  // Modals
-  const [selectedPatientForPrescription, setSelectedPatientForPrescription] = useState(null);
-  const [isPrescriptionModalOpen, setIsPrescriptionModalOpen] = useState(false);
+  const totalPatients = patients.length + 137;
+  const completedCount = completedAppointments.length + 116;
+  const pendingCount = pendingAppointments.length;
+  const totalRevenue = 10650;
+  const thisMonthRevenue = 4350;
 
-  const [selectedPatientForHistory, setSelectedPatientForHistory] = useState(null);
-  const [isPatientHistoryOpen, setIsPatientHistoryOpen] = useState(false);
-
-  const [isDoctorHistoryOpen, setIsDoctorHistoryOpen] = useState(false);
-
-  // Status updates
-  const handleStatusChange = (id, newStatus) => {
-    const updated = updateAppointmentStatus(id, newStatus);
-    setAppointments([...updated]);
+  const handleAccept = (id) => {
+    const updated = acceptAppointment(id);
+    setAppointments(updated);
   };
 
-  const handleOpenPrescription = (patientName) => {
-    const patientObj = patients.find((p) => p.name.toLowerCase() === patientName?.toLowerCase()) || patients[0];
-    setSelectedPatientForPrescription(patientObj);
-    setIsPrescriptionModalOpen(true);
+  const handleReject = (id) => {
+    const updated = rejectAppointment(id);
+    setAppointments(updated);
   };
 
-  const handleOpenPatientHistory = (patientName) => {
-    const patientObj = patients.find((p) => p.name.toLowerCase() === patientName?.toLowerCase()) || patients[0];
-    setSelectedPatientForHistory(patientObj);
-    setIsPatientHistoryOpen(true);
-  };
-
-  const todayAppointments = appointments.slice(0, 4);
+  const maxAppts = Math.max(...monthlyStats.map((s) => s.appointments));
 
   return (
     <PanelLayout
       role="doctor"
-      title={`Clinical Operations: ${currentDoctor.name}`}
-      subtitle="Supervise your scheduled consultations, examine patient medical charts, issue digital prescriptions, and record diagnoses."
+      title="Doctor Clinical Dashboard"
+      subtitle="Supervise your daily clinical consultations, track revenue, examine patient case files, and manage your practice schedule."
     >
       <div className="space-y-8">
-        {/* Doctor Identity Hero Banner */}
-        <div className="rounded-3xl bg-gradient-to-r from-emerald-800 via-teal-900 to-slate-950 p-6 sm:p-10 text-white shadow-xl relative overflow-hidden border border-emerald-700/40">
+        <div className="rounded-3xl bg-gradient-to-r from-emerald-900 via-teal-950 to-slate-950 p-6 sm:p-10 text-white shadow-xl relative overflow-hidden border border-emerald-800/40">
           <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-            <div className="flex items-center gap-5">
+            <div className="flex items-start sm:items-center gap-5">
               <div className="relative">
                 <img
-                  src={currentDoctor.avatar}
-                  alt={currentDoctor.name}
-                  className="w-22 h-22 rounded-3xl object-cover border-2 border-white/90 shadow-lg"
+                  src={profile.avatar}
+                  alt={profile.name}
+                  className="w-20 h-20 rounded-3xl object-cover border-2 border-white/80 shadow-lg"
                 />
                 <span className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-emerald-400 border-2 border-slate-900 animate-pulse"></span>
               </div>
-
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
-                  <span className="px-3 py-0.5 rounded-full bg-white/15 text-emerald-200 text-xs font-bold backdrop-blur-md border border-white/10">
-                    On Duty Specialist
+                  <h2 className="text-xl sm:text-3xl font-black text-white">{profile.name}</h2>
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-400/20 text-emerald-300 border border-emerald-400/30">
+                    {profile.verificationStatus}
                   </span>
-                  <span className="text-xs text-emerald-300 font-semibold">• {currentDoctor.qualification}</span>
                 </div>
-                <h2 className="text-2xl sm:text-3xl font-black text-white">{currentDoctor.name}</h2>
-                <p className="text-emerald-100/90 text-xs sm:text-sm font-medium flex items-center gap-1.5">
-                  <Stethoscope className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>{currentDoctor.specialty}</span>
-                  <span>•</span>
-                  <span>{currentDoctor.clinic}</span>
+                <p className="text-xs sm:text-sm text-emerald-200 font-bold">{profile.specialization}</p>
+                <p className="text-xs text-slate-300 flex items-center gap-1.5">
+                  <Building className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>{profile.clinicName}</span>
                 </p>
-                <div className="flex items-center gap-3 pt-1 text-xs">
-                  <span className="flex items-center gap-1 font-bold text-amber-300 bg-black/20 px-2 py-0.5 rounded-lg">
-                    ★ {currentDoctor.rating} (120+ clinical reviews)
-                  </span>
-                  <span className="font-extrabold text-white">Fee: {currentDoctor.fee}</span>
-                </div>
               </div>
             </div>
 
-            <div className="flex flex-wrap items-center gap-3">
-              <button
-                onClick={() => setIsDoctorHistoryOpen(true)}
-                className="px-5 py-3 rounded-2xl bg-white hover:bg-emerald-50 text-slate-950 text-xs sm:text-sm font-extrabold shadow-md transition flex items-center gap-2"
+            <div className="flex flex-wrap items-center gap-2.5">
+              <Link
+                to="/doctor/consultation"
+                className="px-4 py-2.5 rounded-2xl bg-white hover:bg-emerald-50 text-slate-950 text-xs font-bold shadow-lg transition flex items-center gap-1.5"
               >
-                <Eye className="w-4 h-4 text-emerald-600" />
-                <span>My Case History</span>
-              </button>
-              <button
-                onClick={() => handleOpenPrescription(patients[0]?.name)}
-                className="px-5 py-3 rounded-2xl bg-white/10 hover:bg-white/20 text-white text-xs sm:text-sm font-bold border border-white/20 backdrop-blur-md transition flex items-center gap-2"
+                <Video className="w-4 h-4 text-emerald-600" />
+                <span>Start Video Consult</span>
+              </Link>
+              <Link
+                to="/doctor/schedule"
+                className="px-4 py-2.5 rounded-2xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold border border-white/20 backdrop-blur-md transition flex items-center gap-1.5"
               >
-                <FileText className="w-4 h-4" />
-                <span>Quick Prescription</span>
-              </button>
+                <Calendar className="w-4 h-4" />
+                <span>Manage Schedule</span>
+              </Link>
+              <Link
+                to="/doctor/prescriptions"
+                className="px-4 py-2.5 rounded-2xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold border border-white/20 backdrop-blur-md transition flex items-center gap-1.5"
+              >
+                <Pill className="w-4 h-4" />
+                <span>Write Prescription</span>
+              </Link>
             </div>
           </div>
-          <div className="absolute -right-10 -bottom-10 w-72 h-72 bg-emerald-500/20 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute -right-12 -bottom-12 w-72 h-72 bg-emerald-600/20 rounded-full blur-3xl pointer-events-none" />
         </div>
 
-        {/* Doctor KPIs */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-xs hover:shadow-md transition">
-            <div className="flex items-center justify-between text-xs">
-              <span className="font-extrabold uppercase tracking-wider text-slate-400">Today's Consultations</span>
-              <div className="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+          <div className="p-5 rounded-3xl bg-white border border-slate-200/80 shadow-xs space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">Today's Visits</span>
+              <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                <Calendar className="w-4 h-4" />
+              </div>
+            </div>
+            <p className="text-2xl font-black text-slate-900">{todayAppointments.length}</p>
+            <p className="text-[11px] text-emerald-600 font-bold">
+              <span>Scheduled encounters</span>
+            </p>
+          </div>
+
+          <div className="p-5 rounded-3xl bg-white border border-slate-200/80 shadow-xs space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">Total Patients</span>
+              <div className="w-8 h-8 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center">
+                <Users className="w-4 h-4" />
+              </div>
+            </div>
+            <p className="text-2xl font-black text-slate-900">{totalPatients}</p>
+            <p className="text-[11px] text-purple-600 font-bold">
+              <span>Assigned records</span>
+            </p>
+          </div>
+
+          <div className="p-5 rounded-3xl bg-white border border-slate-200/80 shadow-xs space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">Completed Visits</span>
+              <div className="w-8 h-8 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center">
+                <CheckCircle2 className="w-4 h-4" />
+              </div>
+            </div>
+            <p className="text-2xl font-black text-sky-600">{completedCount}</p>
+            <p className="text-[11px] text-slate-500 font-medium">
+              <span>All-time consultations</span>
+            </p>
+          </div>
+
+          <div className="p-5 rounded-3xl bg-white border border-slate-200/80 shadow-xs space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">Pending Requests</span>
+              <div className="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
+                <Clock className="w-4 h-4" />
+              </div>
+            </div>
+            <p className="text-2xl font-black text-amber-600">{pendingCount}</p>
+            <p className="text-[11px] text-amber-600 font-bold">
+              <span>Awaiting acceptance</span>
+            </p>
+          </div>
+
+          <div className="p-5 rounded-3xl bg-white border border-slate-200/80 shadow-xs space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">Gross Revenue</span>
+              <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                <DollarSign className="w-4 h-4" />
+              </div>
+            </div>
+            <p className="text-2xl font-black text-emerald-600">${totalRevenue.toLocaleString()}</p>
+            <p className="text-[11px] text-slate-500 font-medium">
+              <span>90% doctor share</span>
+            </p>
+          </div>
+
+          <div className="p-5 rounded-3xl bg-white border border-slate-200/80 shadow-xs space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">This Month</span>
+              <div className="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                <TrendingUp className="w-4 h-4" />
+              </div>
+            </div>
+            <p className="text-2xl font-black text-indigo-600">${thisMonthRevenue.toLocaleString()}</p>
+            <p className="text-[11px] text-emerald-600 font-bold">
+              <span>+14.8% growth</span>
+            </p>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-3xl border border-slate-200/80 p-6 sm:p-8 shadow-xs">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-slate-100">
+            <div>
+              <h3 className="font-extrabold text-slate-900 text-lg">Monthly Appointment Statistics & Revenue</h3>
+              <p className="text-xs text-slate-400">Consultation volume and monthly earnings trend over the past 7 months</p>
+            </div>
+            <span className="text-xs font-black text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-200">
+              Avg 48 appointments / month
+            </span>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-3 items-end pt-6">
+            {monthlyStats.map((stat, i) => {
+              const heightPercent = Math.round((stat.appointments / maxAppts) * 100);
+              return (
+                <div key={i} className="flex flex-col items-center gap-2">
+                  <span className="text-[10px] font-black text-slate-500">${stat.revenue}</span>
+                  <div className="w-full bg-slate-100 rounded-2xl h-44 flex items-end p-1.5">
+                    <div
+                      style={{ height: `${heightPercent}%` }}
+                      className="w-full rounded-xl bg-gradient-to-t from-emerald-600 to-teal-400 transition-all duration-500 hover:brightness-110 flex items-center justify-center text-[10px] font-black text-white shadow-xs"
+                    >
+                      {stat.appointments}
+                    </div>
+                  </div>
+                  <span className="text-xs font-bold text-slate-800">{stat.month}</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="bg-white rounded-3xl border border-slate-200/80 p-6 sm:p-8 shadow-xs">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-slate-100">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
                 <Calendar className="w-5 h-5" />
               </div>
-            </div>
-            <div className="mt-4 flex items-baseline gap-2">
-              <span className="text-3xl font-black text-slate-900 tracking-tight">{todayAppointments.length}</span>
-              <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
-                2 Confirmed
-              </span>
-            </div>
-            <p className="text-xs text-slate-400 mt-2 font-medium">Scheduled for today</p>
-          </div>
-
-          <div className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-xs hover:shadow-md transition">
-            <div className="flex items-center justify-between text-xs">
-              <span className="font-extrabold uppercase tracking-wider text-slate-400">Total Patient Caseload</span>
-              <div className="w-10 h-10 rounded-2xl bg-teal-50 text-teal-600 flex items-center justify-center">
-                <Users className="w-5 h-5" />
+              <div>
+                <h3 className="font-extrabold text-slate-900 text-lg">Today's Appointment Schedule</h3>
+                <p className="text-xs text-slate-400">Patients booked for today ({todayAppointments.length} consultations)</p>
               </div>
-            </div>
-            <div className="mt-4 flex items-baseline gap-2">
-              <span className="text-3xl font-black text-slate-900 tracking-tight">{currentDoctor.patientsCount}</span>
-              <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
-                +12 this month
-              </span>
-            </div>
-            <p className="text-xs text-slate-400 mt-2 font-medium">Patients treated</p>
-          </div>
-
-          <div className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-xs hover:shadow-md transition">
-            <div className="flex items-center justify-between text-xs">
-              <span className="font-extrabold uppercase tracking-wider text-slate-400">Practice Earnings</span>
-              <div className="w-10 h-10 rounded-2xl bg-sky-50 text-sky-600 flex items-center justify-center">
-                <DollarSign className="w-5 h-5" />
-              </div>
-            </div>
-            <div className="mt-4 flex items-baseline gap-2">
-              <span className="text-3xl font-black text-slate-900 tracking-tight">$8,450</span>
-              <span className="text-xs font-bold text-sky-600 bg-sky-50 px-2 py-0.5 rounded-full">+15% MoM</span>
-            </div>
-            <p className="text-xs text-slate-400 mt-2 font-medium">Earned this fiscal cycle</p>
-          </div>
-
-          <div className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-xs hover:shadow-md transition">
-            <div className="flex items-center justify-between text-xs">
-              <span className="font-extrabold uppercase tracking-wider text-slate-400">Clinical Satisfaction</span>
-              <div className="w-10 h-10 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center">
-                <Star className="w-5 h-5" />
-              </div>
-            </div>
-            <div className="mt-4 flex items-baseline gap-2">
-              <span className="text-3xl font-black text-slate-900 tracking-tight">4.9 / 5.0</span>
-              <span className="text-xs font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full">Top 5%</span>
-            </div>
-            <p className="text-xs text-slate-400 mt-2 font-medium">Cardiology peer rating</p>
-          </div>
-        </div>
-
-        {/* Today's Queue Section */}
-        <div className="bg-white rounded-3xl border border-slate-200/80 p-6 sm:p-8 shadow-xs space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
-            <div>
-              <h3 className="text-xl font-extrabold text-slate-900">Today's Consultation Schedule</h3>
-              <p className="text-xs text-slate-400">Patient arrival queue, chief symptoms, and immediate actions</p>
             </div>
             <Link
               to="/doctor/appointments"
               className="text-xs font-bold text-emerald-600 hover:text-emerald-700 flex items-center gap-1 group"
             >
-              <span>Full Schedule ({appointments.length})</span>
+              <span>View All Appointments</span>
               <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
             </Link>
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-3">
             {todayAppointments.map((apt) => (
               <div
                 key={apt.id}
-                className="p-5 rounded-3xl border border-slate-100 bg-slate-50/60 hover:bg-white hover:border-emerald-200 hover:shadow-xs transition-all flex flex-col lg:flex-row lg:items-center justify-between gap-6"
+                className="p-4 rounded-2xl border border-slate-200/80 bg-slate-50/60 hover:bg-white hover:border-emerald-200 hover:shadow-xs transition flex flex-col sm:flex-row sm:items-center justify-between gap-4"
               >
-                <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-800 font-extrabold flex items-center justify-center shrink-0">
-                    <Clock className="w-5 h-5 text-emerald-700" />
-                  </div>
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2.5 flex-wrap">
-                      <p className="font-extrabold text-slate-900 text-base">{apt.patientName}</p>
-                      <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700">
+                <div className="flex items-center gap-3.5">
+                  <img
+                    src={apt.patientAvatar}
+                    alt={apt.patientName}
+                    className="w-12 h-12 rounded-2xl object-cover border-2 border-white shadow-xs"
+                  />
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <p className="font-extrabold text-slate-900 text-sm leading-snug">{apt.patientName}</p>
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">
                         {apt.time}
                       </span>
-                      <span
-                        className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full border ${
-                          apt.status === "Confirmed"
-                            ? "bg-emerald-100 text-emerald-800 border-emerald-200"
-                            : apt.status === "Completed"
-                            ? "bg-sky-100 text-sky-800 border-sky-200"
-                            : "bg-amber-100 text-amber-800 border-amber-200"
-                        }`}
-                      >
-                        {apt.status}
-                      </span>
                     </div>
-
-                    <p className="text-xs text-slate-600 font-medium">
-                      <span className="text-slate-400 font-normal">Reported Chief Complaint: </span>
-                      {apt.symptoms}
+                    <p className="text-xs text-slate-500 font-medium">
+                      {apt.patientAge}y, {apt.patientGender} • {apt.type} ({apt.room})
                     </p>
-
-                    <p className="text-[11px] text-slate-400">
-                      Visit Type: {apt.type} • Consultation Date: {apt.date}
+                    <p className="text-[11px] text-slate-400 italic mt-0.5 truncate max-w-md">
+                      Reason: {apt.symptoms}
                     </p>
                   </div>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-2.5">
-                  <button
-                    onClick={() => handleOpenPatientHistory(apt.patientName)}
-                    className="px-4 py-2 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-100 text-xs font-bold flex items-center gap-1.5 transition"
-                  >
-                    <Eye className="w-3.5 h-3.5" />
-                    <span>Patient History</span>
-                  </button>
-
-                  <button
-                    onClick={() => handleOpenPrescription(apt.patientName)}
-                    className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm transition"
-                  >
-                    <FileText className="w-3.5 h-3.5" />
-                    <span>Prescribe & Complete</span>
-                  </button>
-
-                  {apt.status === "Pending" && (
-                    <button
-                      onClick={() => handleStatusChange(apt.id, "Confirmed")}
-                      className="px-3 py-2 rounded-xl bg-emerald-100 hover:bg-emerald-200 text-emerald-800 text-xs font-bold transition"
+                <div className="flex items-center gap-2">
+                  {apt.status === "Pending" ? (
+                    <>
+                      <button
+                        onClick={() => handleAccept(apt.id)}
+                        className="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition shadow-xs"
+                      >
+                        Accept
+                      </button>
+                      <button
+                        onClick={() => handleReject(apt.id)}
+                        className="px-3 py-2 rounded-xl bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 text-xs font-bold transition"
+                      >
+                        Decline
+                      </button>
+                    </>
+                  ) : (
+                    <Link
+                      to="/doctor/consultation"
+                      className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition flex items-center gap-1.5 shadow-xs"
                     >
-                      Accept
-                    </button>
+                      <Video className="w-3.5 h-3.5" />
+                      <span>Join Consult</span>
+                    </Link>
                   )}
                 </div>
               </div>
@@ -290,62 +308,102 @@ export default function DoctorDashboard() {
           </div>
         </div>
 
-        {/* Doctor's Consultation History Archive */}
-        <div className="bg-white rounded-3xl border border-slate-200/80 p-6 sm:p-8 shadow-xs space-y-4">
-          <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-            <div>
-              <h3 className="text-lg font-extrabold text-slate-900">Your Recent Consultation Archive</h3>
-              <p className="text-xs text-slate-400">Clinical summaries and treatments recorded by you</p>
-            </div>
-            <button
-              onClick={() => setIsDoctorHistoryOpen(true)}
-              className="text-xs font-bold text-emerald-600 hover:underline"
+        <div className="bg-white rounded-3xl border border-slate-200/80 p-6 sm:p-8 shadow-xs">
+          <h3 className="font-extrabold text-slate-900 text-lg mb-4">Doctor Clinical Modules</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <Link
+              to="/doctor/profile"
+              className="p-5 rounded-2xl border border-slate-100 bg-slate-50/60 hover:bg-white hover:border-emerald-200 hover:shadow-xs transition group"
             >
-              Expand All History
-            </button>
-          </div>
-
-          <div className="space-y-3">
-            {(currentDoctor.consultationHistory || []).map((h, i) => (
-              <div key={h.id || i} className="p-4 rounded-2xl bg-slate-50 border border-slate-100 space-y-1.5 text-xs">
-                <div className="flex items-center justify-between">
-                  <span className="font-bold text-slate-900 text-sm">{h.patientName}</span>
-                  <span className="text-slate-400 font-medium">{h.date}</span>
-                </div>
-                <p className="text-slate-600">
-                  <span className="font-bold text-slate-700">Diagnosis: </span>
-                  {h.diagnosis}
-                </p>
-                <p className="text-slate-600">
-                  <span className="font-bold text-slate-700">Prescription: </span>
-                  {h.treatment}
-                </p>
+              <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
+                <ShieldCheck className="w-5 h-5" />
               </div>
-            ))}
+              <h4 className="font-extrabold text-slate-900 text-sm">Professional Profile</h4>
+              <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                Specialization, qualifications, experience, fees, hospital affiliations, languages, and credentials.
+              </p>
+            </Link>
+
+            <Link
+              to="/doctor/schedule"
+              className="p-5 rounded-2xl border border-slate-100 bg-slate-50/60 hover:bg-white hover:border-emerald-200 hover:shadow-xs transition group"
+            >
+              <div className="w-10 h-10 rounded-xl bg-teal-100 text-teal-700 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
+                <Sliders className="w-5 h-5" />
+              </div>
+              <h4 className="font-extrabold text-slate-900 text-sm">Schedule Management</h4>
+              <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                Working days, consultation hours, slot durations, blocked dates, and vacation/leave requests.
+              </p>
+            </Link>
+
+            <Link
+              to="/doctor/appointments"
+              className="p-5 rounded-2xl border border-slate-100 bg-slate-50/60 hover:bg-white hover:border-emerald-200 hover:shadow-xs transition group"
+            >
+              <div className="w-10 h-10 rounded-xl bg-sky-100 text-sky-700 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
+                <Calendar className="w-5 h-5" />
+              </div>
+              <h4 className="font-extrabold text-slate-900 text-sm">Appointments Ledger</h4>
+              <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                Today's and upcoming appointments, accept/reject requests, reschedule bookings, and patient history.
+              </p>
+            </Link>
+
+            <Link
+              to="/doctor/patients"
+              className="p-5 rounded-2xl border border-slate-100 bg-slate-50/60 hover:bg-white hover:border-emerald-200 hover:shadow-xs transition group"
+            >
+              <div className="w-10 h-10 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
+                <Users className="w-5 h-5" />
+              </div>
+              <h4 className="font-extrabold text-slate-900 text-sm">Patient Medical Charts</h4>
+              <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                Comprehensive patient roster, clinical histories, previous consults, allergies, and active drugs.
+              </p>
+            </Link>
+
+            <Link
+              to="/doctor/consultation"
+              className="p-5 rounded-2xl border border-slate-100 bg-slate-50/60 hover:bg-white hover:border-emerald-200 hover:shadow-xs transition group"
+            >
+              <div className="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
+                <Video className="w-5 h-5" />
+              </div>
+              <h4 className="font-extrabold text-slate-900 text-sm">Live Consultation Room</h4>
+              <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                Video calling, patient chat, clinical notes, symptoms, diagnosis, and treatment plan recording.
+              </p>
+            </Link>
+
+            <Link
+              to="/doctor/prescriptions"
+              className="p-5 rounded-2xl border border-slate-100 bg-slate-50/60 hover:bg-white hover:border-emerald-200 hover:shadow-xs transition group"
+            >
+              <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
+                <Pill className="w-5 h-5" />
+              </div>
+              <h4 className="font-extrabold text-slate-900 text-sm">Electronic Prescriptions</h4>
+              <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                Dynamic drug addition, dosages, frequency, duration, PDF/print generation, and prescription records.
+              </p>
+            </Link>
+
+            <Link
+              to="/doctor/reports"
+              className="p-5 rounded-2xl border border-slate-100 bg-slate-50/60 hover:bg-white hover:border-emerald-200 hover:shadow-xs transition group"
+            >
+              <div className="w-10 h-10 rounded-xl bg-rose-100 text-rose-700 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
+                <FolderOpen className="w-5 h-5" />
+              </div>
+              <h4 className="font-extrabold text-slate-900 text-sm">Medical Reports & Scans</h4>
+              <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                Upload diagnostic reports, inspect lab results, and record expert clinical interpretations.
+              </p>
+            </Link>
           </div>
         </div>
       </div>
-
-      {/* Modals */}
-      <PrescriptionModal
-        isOpen={isPrescriptionModalOpen}
-        onClose={() => setIsPrescriptionModalOpen(false)}
-        patient={selectedPatientForPrescription}
-        doctorName={currentDoctor.name}
-        doctorSpecialty={currentDoctor.specialty}
-      />
-
-      <PatientHistoryModal
-        isOpen={isPatientHistoryOpen}
-        onClose={() => setIsPatientHistoryOpen(false)}
-        patient={selectedPatientForHistory}
-      />
-
-      <DoctorHistoryModal
-        doctor={currentDoctor}
-        isOpen={isDoctorHistoryOpen}
-        onClose={() => setIsDoctorHistoryOpen(false)}
-      />
     </PanelLayout>
   );
 }

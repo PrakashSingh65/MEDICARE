@@ -23,6 +23,10 @@ import {
   Layers,
   Settings,
   LayoutDashboard,
+  Video,
+  Sliders,
+  FolderOpen,
+  UserCheck,
 } from "lucide-react";
 
 export default function PanelLayout({ role = "admin", title, subtitle, children }) {
@@ -47,9 +51,14 @@ export default function PanelLayout({ role = "admin", title, subtitle, children 
       { name: "Medicine Inventory", path: "/admin/medicines", icon: Pill },
     ],
     doctor: [
-      { name: "Clinical Dashboard", path: "/doctor", icon: Activity },
-      { name: "My Appointments", path: "/doctor/appointments", icon: Calendar },
-      { name: "Patient Charts", path: "/doctor/patients", icon: Users },
+      { name: "Dashboard", path: "/doctor", icon: LayoutDashboard },
+      { name: "Doctor Profile", path: "/doctor/profile", icon: UserCheck },
+      { name: "Schedule Management", path: "/doctor/schedule", icon: Sliders },
+      { name: "Appointments", path: "/doctor/appointments", icon: Calendar },
+      { name: "Patient Management", path: "/doctor/patients", icon: Users },
+      { name: "Live Consultation", path: "/doctor/consultation", icon: Video },
+      { name: "Prescriptions", path: "/doctor/prescriptions", icon: Pill },
+      { name: "Medical Reports", path: "/doctor/reports", icon: FolderOpen },
     ],
     patient: [
       { name: "Wellness Dashboard", path: "/patient", icon: Activity },
