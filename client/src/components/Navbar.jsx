@@ -17,6 +17,9 @@ import {
   Menu,
   X,
   ChevronRight,
+  CreditCard,
+  Layers,
+  Settings,
 } from "lucide-react";
 import { useLogout, useCheckAuth } from "../api/authApi";
 import { logout, setCredentials, selectCurrentUser } from "../redux/authSlice";
@@ -39,9 +42,10 @@ const roleConfig = {
       { label: "Dashboard", path: "/admin", icon: ShieldCheck, exact: true },
       { label: "Doctors", path: "/admin/doctors", icon: Stethoscope },
       { label: "Patients", path: "/admin/patients", icon: Users },
-      { label: "Medicines", path: "/admin/medicines", icon: Pill },
-      { label: "Analytics", path: "/admin/analytics", icon: TrendingUp },
-      { label: "Help", path: "/contact", icon: PhoneCall },
+      { label: "Appointments", path: "/admin/appointments", icon: Calendar },
+      { label: "Payments", path: "/admin/payments", icon: CreditCard },
+      { label: "Content", path: "/admin/content", icon: Layers },
+      { label: "System", path: "/admin/system", icon: Settings },
     ],
   },
   doctor: {
@@ -154,7 +158,6 @@ const Navbar = () => {
   return (
     <header className="sticky top-0 z-40 glass-nav border-b border-slate-200/80 px-4 sm:px-8 py-3 transition-all duration-200 shadow-xs">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-4">
-        {/* Logo & Brand Identity */}
         <Link to="/" className="flex items-center gap-3 group">
           <div className="relative">
             <div
@@ -189,8 +192,7 @@ const Navbar = () => {
           </div>
         </Link>
 
-        {/* Dynamic Role-Based Navigation Links */}
-        <nav className="hidden md:flex items-center p-1.5 rounded-2xl bg-slate-100/90 border border-slate-200/80 shadow-xs gap-0.5">
+        <nav className="hidden md:flex items-center p-1.5 rounded-2xl bg-slate-100/90 border border-slate-200/80 shadow-xs gap-0.5 overflow-x-auto max-w-3xl">
           {currentConfig.links.map((item) => {
             const Icon = item.icon;
             const active = isItemActive(item.path, item.exact);
@@ -198,7 +200,7 @@ const Navbar = () => {
               <Link
                 key={item.path}
                 to={item.path}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shrink-0 ${
                   active
                     ? currentConfig.activePillClass
                     : currentConfig.hoverPillClass
@@ -211,7 +213,6 @@ const Navbar = () => {
           })}
         </nav>
 
-        {/* User Account / Auth Actions */}
         <div className="flex items-center gap-3">
           {user ? (
             <div className="flex items-center gap-2">
@@ -276,7 +277,6 @@ const Navbar = () => {
             </div>
           )}
 
-          {/* Mobile Menu Toggle Button */}
           <button
             type="button"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -288,7 +288,6 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* Mobile Navigation Dropdown */}
       {mobileMenuOpen && (
         <div className="md:hidden pt-3 pb-2 border-t border-slate-200/80 mt-3 space-y-2">
           {user && (

@@ -19,6 +19,10 @@ import {
   Bell,
   Sparkles,
   LifeBuoy,
+  CreditCard,
+  Layers,
+  Settings,
+  LayoutDashboard,
 } from "lucide-react";
 
 export default function PanelLayout({ role = "admin", title, subtitle, children }) {
@@ -33,11 +37,14 @@ export default function PanelLayout({ role = "admin", title, subtitle, children 
 
   const navigationConfig = {
     admin: [
-      { name: "Overview & Growth", path: "/admin", icon: TrendingUp },
-      { name: "Doctors Directory", path: "/admin/doctors", icon: Stethoscope },
-      { name: "Patients Directory", path: "/admin/patients", icon: Users },
+      { name: "Dashboard", path: "/admin", icon: LayoutDashboard },
+      { name: "Doctor Management", path: "/admin/doctors", icon: Stethoscope },
+      { name: "Patient Management", path: "/admin/patients", icon: Users },
+      { name: "Appointments", path: "/admin/appointments", icon: Calendar },
+      { name: "Payments & Revenue", path: "/admin/payments", icon: CreditCard },
+      { name: "Content Management", path: "/admin/content", icon: Layers },
+      { name: "System Management", path: "/admin/system", icon: Settings },
       { name: "Medicine Inventory", path: "/admin/medicines", icon: Pill },
-      { name: "Revenue & Analytics", path: "/admin/analytics", icon: Activity },
     ],
     doctor: [
       { name: "Clinical Dashboard", path: "/doctor", icon: Activity },
@@ -89,8 +96,7 @@ export default function PanelLayout({ role = "admin", title, subtitle, children 
   return (
     <div className="min-h-screen mesh-bg flex flex-col antialiased">
       <div className="flex-1 flex flex-col lg:flex-row">
-        {/* Aesthetic Desktop Sidebar */}
-        <aside className="hidden lg:flex flex-col w-68 border-r border-slate-200/80 bg-white/90 backdrop-blur-md p-5 space-y-6">
+        <aside className="hidden lg:flex flex-col w-72 border-r border-slate-200/80 bg-white/90 backdrop-blur-md p-5 space-y-6">
           <div className="p-4 rounded-3xl bg-slate-50 border border-slate-200/80 space-y-3">
             <div className="flex items-center gap-3">
               {user?.imageUrl && !avatarError ? (
@@ -119,7 +125,7 @@ export default function PanelLayout({ role = "admin", title, subtitle, children 
             </div>
           </div>
 
-          <nav className="flex-1 space-y-1.5">
+          <nav className="flex-1 space-y-1">
             <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold px-3 mb-2">
               Navigation Menu
             </p>
@@ -130,7 +136,7 @@ export default function PanelLayout({ role = "admin", title, subtitle, children 
                 <Link
                   key={item.path}
                   to={item.path}
-                  className={`flex items-center justify-between px-3.5 py-3 rounded-2xl text-xs font-bold transition-all duration-200 ${
+                  className={`flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-bold transition-all duration-200 ${
                     isActive
                       ? `${theme.activeBg} border-l-4`
                       : "text-slate-600 hover:bg-slate-100/80 hover:text-slate-900"
@@ -148,7 +154,6 @@ export default function PanelLayout({ role = "admin", title, subtitle, children 
             })}
           </nav>
 
-          {/* Clinical Live Metrics Card */}
           <div className="rounded-3xl bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 text-white p-5 space-y-3 text-xs shadow-xl relative overflow-hidden">
             <div className="flex items-center justify-between">
               <span className="font-bold text-sky-400 flex items-center gap-1.5">
@@ -172,7 +177,6 @@ export default function PanelLayout({ role = "admin", title, subtitle, children 
           </div>
         </aside>
 
-        {/* Mobile Header Bar */}
         <div className="lg:hidden glass-nav border-b border-slate-200/80 px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <button
@@ -189,7 +193,6 @@ export default function PanelLayout({ role = "admin", title, subtitle, children 
           </span>
         </div>
 
-        {/* Mobile Navigation Dropdown */}
         {mobileOpen && (
           <div className="lg:hidden bg-white border-b border-slate-200 p-4 space-y-1.5 shadow-xl animate-fadeIn">
             {navItems.map((item) => {
@@ -217,9 +220,7 @@ export default function PanelLayout({ role = "admin", title, subtitle, children 
           </div>
         )}
 
-        {/* Main Content Workspace */}
         <main className="flex-1 p-4 sm:p-8 lg:p-10 max-w-7xl mx-auto w-full space-y-6">
-          {/* Header Banner */}
           {(title || subtitle) && (
             <div className="bg-white/80 backdrop-blur-xs p-6 sm:p-8 rounded-3xl border border-slate-200/80 shadow-xs relative overflow-hidden">
               <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">

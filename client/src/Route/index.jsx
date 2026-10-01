@@ -5,19 +5,20 @@ import Login from "../Page/Login";
 import Signup from "../Page/Signup";
 import Contact from "../Page/Contact";
 
-// Admin Panel Pages
 import AdminDashboard from "../Page/Admin/AdminDashboard";
-import Doctorlist from "../Page/Admin/Doctorlist";
-import UsersList from "../Page/Admin/UsersList";
+import DoctorManagement from "../Page/Admin/DoctorManagement";
+import PatientManagement from "../Page/Admin/PatientManagement";
+import AppointmentManagement from "../Page/Admin/AppointmentManagement";
+import PaymentManagement from "../Page/Admin/PaymentManagement";
+import ContentManagement from "../Page/Admin/ContentManagement";
+import SystemManagement from "../Page/Admin/SystemManagement";
 import MedicineList from "../Page/Admin/MedicineList";
 import RevenueGrowth from "../Page/Admin/RevenueGrowth";
 
-// Doctor Panel Pages
 import DoctorDashboard from "../Page/Doctor/DoctorDashboard";
 import DoctorAppointments from "../Page/Doctor/DoctorAppointments";
 import DoctorPatients from "../Page/Doctor/DoctorPatients";
 
-// Patient Panel Pages
 import PatientDashboard from "../Page/Patient/PatientDashboard";
 import PatientAppointments from "../Page/Patient/PatientAppointments";
 import PatientPrescriptions from "../Page/Patient/PatientPrescriptions";
@@ -47,7 +48,6 @@ export const router = createBrowserRouter([
         element: <Contact />,
       },
 
-      // Admin Panel (Protected: Admin Only)
       {
         path: "admin",
         element: (
@@ -60,7 +60,7 @@ export const router = createBrowserRouter([
         path: "admin/doctors",
         element: (
           <ProtectedRoute allowedRoles={["admin"]}>
-            <Doctorlist />
+            <DoctorManagement />
           </ProtectedRoute>
         ),
       },
@@ -68,7 +68,7 @@ export const router = createBrowserRouter([
         path: "admin/patients",
         element: (
           <ProtectedRoute allowedRoles={["admin"]}>
-            <UsersList />
+            <PatientManagement />
           </ProtectedRoute>
         ),
       },
@@ -76,7 +76,39 @@ export const router = createBrowserRouter([
         path: "admin/users",
         element: (
           <ProtectedRoute allowedRoles={["admin"]}>
-            <UsersList />
+            <PatientManagement />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "admin/appointments",
+        element: (
+          <ProtectedRoute allowedRoles={["admin"]}>
+            <AppointmentManagement />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "admin/payments",
+        element: (
+          <ProtectedRoute allowedRoles={["admin"]}>
+            <PaymentManagement />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "admin/content",
+        element: (
+          <ProtectedRoute allowedRoles={["admin"]}>
+            <ContentManagement />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "admin/system",
+        element: (
+          <ProtectedRoute allowedRoles={["admin"]}>
+            <SystemManagement />
           </ProtectedRoute>
         ),
       },
@@ -97,7 +129,6 @@ export const router = createBrowserRouter([
         ),
       },
 
-      // Doctor Panel (Protected: Doctor & Admin)
       {
         path: "doctor",
         element: (
@@ -123,7 +154,6 @@ export const router = createBrowserRouter([
         ),
       },
 
-      // Patient Panel (Protected: Patient & Admin)
       {
         path: "patient",
         element: (
