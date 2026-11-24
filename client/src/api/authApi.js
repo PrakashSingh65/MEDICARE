@@ -67,9 +67,12 @@ export const useLogout = () => {
 };
 
 export const useCheckAuth = () => {
+  const hasToken = typeof window !== "undefined" && Boolean(localStorage.getItem("medicare_token"));
+
   return useQuery({
     queryKey: ["auth"],
     queryFn: checkAuthUser,
+    enabled: hasToken,
     retry: false,
     refetchOnWindowFocus: false,
     staleTime: 1000 * 60 * 5,

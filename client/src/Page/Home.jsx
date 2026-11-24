@@ -42,6 +42,72 @@ import {
   UserCheck
 } from "lucide-react";
 
+const NODES = [
+  { lat: 0.7, lon: 0.2, label: "New York Hub", ping: 12, color: "#06B6D4", glow: "rgba(6,182,212,0.9)" },
+  { lat: 0.85, lon: 1.8, label: "London Central", ping: 18, color: "#F59E0B", glow: "rgba(245,158,11,0.9)" },
+  { lat: 0.35, lon: 4.1, label: "Mumbai Telehealth", ping: 9, color: "#10B981", glow: "rgba(16,185,129,0.9)" },
+  { lat: 0.55, lon: 5.2, label: "Tokyo Bio-Node", ping: 15, color: "#EC4899", glow: "rgba(236,72,153,0.9)" },
+  { lat: -0.4, lon: 4.9, label: "Singapore Care", ping: 22, color: "#8B5CF6", glow: "rgba(139,92,246,0.9)" },
+  { lat: -0.5, lon: 2.5, label: "Zurich Clinical", ping: 14, color: "#F43F5E", glow: "rgba(244,63,94,0.9)" },
+];
+
+const CONNECTION_PAIRS = [
+  { from: 0, to: 1, c1: "#06B6D4", c2: "#F59E0B", name: "NY-LON" },
+  { from: 1, to: 5, c1: "#F59E0B", c2: "#F43F5E", name: "LON-ZUR" },
+  { from: 5, to: 2, c1: "#F43F5E", c2: "#10B981", name: "ZUR-MUM" },
+  { from: 2, to: 4, c1: "#10B981", c2: "#8B5CF6", name: "MUM-SIN" },
+  { from: 4, to: 3, c1: "#8B5CF6", c2: "#EC4899", name: "SIN-TYO" },
+  { from: 3, to: 0, c1: "#EC4899", c2: "#06B6D4", name: "TYO-NY" },
+  { from: 0, to: 4, c1: "#06B6D4", c2: "#8B5CF6", name: "NY-SIN" },
+];
+
+const BODY_PARTS_DATA = {
+  head: {
+    name: "Cranial & Neuro System",
+    status: "Optimal Function",
+    statusColor: "text-emerald-400 bg-emerald-950/80 border-emerald-500/50",
+    temp: "36.6 °C",
+    risk: "Low Risk (8%)",
+    symptoms: "Mild screen fatigue, normal cognitive alertness.",
+    prognosis: "Healthy EEG frequencies detected. Hydration and 15-min rest advised.",
+  },
+  chest: {
+    name: "Cardiothoracic Matrix",
+    status: "Active Tele-Monitoring",
+    statusColor: "text-amber-400 bg-amber-950/80 border-amber-500/50",
+    temp: "37.0 °C",
+    risk: "Moderate Risk (28%)",
+    symptoms: "Elevated resting pulse after exertion; stable ST segment on 12-lead telemetry.",
+    prognosis: "Sinus rhythm verified. Proactive lipid profile screening scheduled.",
+  },
+  abdomen: {
+    name: "Metabolic & Gastrointestinal",
+    status: "Stable Baseline",
+    statusColor: "text-cyan-400 bg-cyan-950/80 border-cyan-500/50",
+    temp: "36.8 °C",
+    risk: "Normal (14%)",
+    symptoms: "Normal glycemic indices, fasting glucose 94 mg/dL.",
+    prognosis: "Optimal gut microbiome metabolic activity. Maintain daily dietary fiber.",
+  },
+  joints: {
+    name: "Musculoskeletal & Locomotor",
+    status: "Optimal Mobility",
+    statusColor: "text-emerald-400 bg-emerald-950/80 border-emerald-500/50",
+    temp: "36.4 °C",
+    risk: "Low Risk (11%)",
+    symptoms: "Normal range of motion across spinal, knee, and shoulder joints.",
+    prognosis: "Daily step goal 8,240 achieved. Joint inflammation biomarkers absent.",
+  },
+};
+
+const GENOMIC_RISKS = [
+  { name: "Cardiovascular Susceptibility", value: 24, level: "Low", color: "from-cyan-500 to-teal-400" },
+  { name: "Type-2 Diabetes Marker", value: 42, level: "Moderate", color: "from-amber-400 to-orange-500" },
+  { name: "Hypertension Disposition", value: 18, level: "Low", color: "from-emerald-400 to-teal-500" },
+  { name: "CYP2D6 Drug Metabolism Rate", value: 88, level: "Extensive (Rapid)", color: "from-blue-500 to-indigo-600" },
+  { name: "Autoimmune Reactivity", value: 12, level: "Minimal", color: "from-fuchsia-400 to-pink-500" },
+];
+
 export default function Home() {
   const [telemetryTab, setTelemetryTab] = useState("vitals");
   const [selectedBodyPart, setSelectedBodyPart] = useState("chest");
@@ -93,6 +159,7 @@ export default function Home() {
     const ctx = canvas.getContext("2d");
     let animationFrameId;
     let rotation = 0;
+    let isVisible = true;
 
     const resizeCanvas = () => {
       canvas.width = canvas.parentElement.clientWidth || 450;
@@ -101,72 +168,18 @@ export default function Home() {
     resizeCanvas();
     window.addEventListener("resize", resizeCanvas);
 
-    const nodes = [
-      { lat: 0.7, lon: 0.2, label: "New York Hub", ping: 12, color: "#06B6D4", glow: "rgba(6,182,212,0.9)" },
-      { lat: 0.85, lon: 1.8, label: "London Central", ping: 18, color: "#F59E0B", glow: "rgba(245,158,11,0.9)" },
-      { lat: 0.35, lon: 4.1, label: "Mumbai Telehealth", ping: 9, color: "#10B981", glow: "rgba(16,185,129,0.9)" },
-      { lat: 0.55, lon: 5.2, label: "Tokyo Bio-Node", ping: 15, color: "#EC4899", glow: "rgba(236,72,153,0.9)" },
-      { lat: -0.4, lon: 4.9, label: "Singapore Care", ping: 22, color: "#8B5CF6", glow: "rgba(139,92,246,0.9)" },
-      { lat: -0.5, lon: 2.5, label: "Zurich Clinical", ping: 14, color: "#F43F5E", glow: "rgba(244,63,94,0.9)" },
-    ];
-
-    const connectionPairs = [
-      { from: 0, to: 1, c1: "#06B6D4", c2: "#F59E0B", name: "NY-LON" },
-      { from: 1, to: 5, c1: "#F59E0B", c2: "#F43F5E", name: "LON-ZUR" },
-      { from: 5, to: 2, c1: "#F43F5E", c2: "#10B981", name: "ZUR-MUM" },
-      { from: 2, to: 4, c1: "#10B981", c2: "#8B5CF6", name: "MUM-SIN" },
-      { from: 4, to: 3, c1: "#8B5CF6", c2: "#EC4899", name: "SIN-TYO" },
-      { from: 3, to: 0, c1: "#EC4899", c2: "#06B6D4", name: "TYO-NY" },
-      { from: 0, to: 4, c1: "#06B6D4", c2: "#8B5CF6", name: "NY-SIN" },
-    ];
-
     const render = () => {
+      if (!isVisible) return;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       const centerX = canvas.width / 2;
       const centerY = canvas.height / 2;
       const radius = Math.min(centerX, centerY) - 34;
 
-      const bgGlow = ctx.createRadialGradient(centerX, centerY, radius * 0.1, centerX, centerY, radius * 1.35);
-      bgGlow.addColorStop(0, "rgba(6, 182, 212, 0.16)");
-      bgGlow.addColorStop(0.45, "rgba(13, 148, 136, 0.12)");
-      bgGlow.addColorStop(0.75, "rgba(10, 25, 47, 0.4)");
-      bgGlow.addColorStop(1, "rgba(2, 6, 23, 0)");
-      ctx.fillStyle = bgGlow;
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
       ctx.beginPath();
       ctx.arc(centerX, centerY, radius + 8, 0, Math.PI * 2);
-      ctx.strokeStyle = "rgba(6, 182, 212, 0.55)";
-      ctx.lineWidth = 2.5;
-      ctx.shadowColor = "#06B6D4";
-      ctx.shadowBlur = 24;
-      ctx.stroke();
-      ctx.shadowBlur = 0;
-
-      const globeGrad = ctx.createRadialGradient(
-        centerX - radius * 0.35,
-        centerY - radius * 0.35,
-        radius * 0.05,
-        centerX,
-        centerY,
-        radius
-      );
-      globeGrad.addColorStop(0, "rgba(6, 182, 212, 0.38)");
-      globeGrad.addColorStop(0.25, "rgba(14, 45, 95, 0.88)");
-      globeGrad.addColorStop(0.75, "rgba(5, 18, 44, 0.98)");
-      globeGrad.addColorStop(1, "rgba(6, 182, 212, 0.7)");
-
-      ctx.beginPath();
-      ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
-      ctx.fillStyle = globeGrad;
-      ctx.fill();
-
-      ctx.strokeStyle = "rgba(6, 182, 212, 0.9)";
+      ctx.strokeStyle = "rgba(6, 182, 212, 0.45)";
       ctx.lineWidth = 2;
-      ctx.shadowColor = "#06B6D4";
-      ctx.shadowBlur = 20;
       ctx.stroke();
-      ctx.shadowBlur = 0;
 
       for (let lat = -60; lat <= 60; lat += 25) {
         const phi = (lat * Math.PI) / 180;
@@ -174,7 +187,7 @@ export default function Home() {
         const rLat = radius * Math.cos(phi);
         ctx.beginPath();
         ctx.ellipse(centerX, y, rLat, rLat * 0.24, 0, 0, Math.PI * 2);
-        ctx.strokeStyle = "rgba(6, 182, 212, 0.3)";
+        ctx.strokeStyle = "rgba(6, 182, 212, 0.2)";
         ctx.lineWidth = 1;
         ctx.stroke();
       }
@@ -183,12 +196,12 @@ export default function Home() {
         const angle = rotation + (i * Math.PI) / 4;
         ctx.beginPath();
         ctx.ellipse(centerX, centerY, radius * Math.abs(Math.cos(angle)), radius, 0, 0, Math.PI * 2);
-        ctx.strokeStyle = "rgba(20, 184, 166, 0.26)";
+        ctx.strokeStyle = "rgba(20, 184, 166, 0.2)";
         ctx.lineWidth = 1;
         ctx.stroke();
       }
 
-      const projectedNodes = nodes.map((node) => {
+      const projectedNodes = NODES.map((node) => {
         const angle = node.lon + rotation;
         const x3d = Math.cos(angle) * Math.cos(node.lat);
         const z3d = Math.sin(angle) * Math.cos(node.lat);
@@ -200,59 +213,38 @@ export default function Home() {
         return { ...node, screenX, screenY, visible, scale };
       });
 
-      connectionPairs.forEach((pair, idx) => {
+      CONNECTION_PAIRS.forEach((pair, idx) => {
         const n1 = projectedNodes[pair.from];
         const n2 = projectedNodes[pair.to];
 
         if (n1.visible || n2.visible) {
-          const arcGrad = ctx.createLinearGradient(n1.screenX, n1.screenY, n2.screenX, n2.screenY);
-          arcGrad.addColorStop(0, pair.c1);
-          arcGrad.addColorStop(0.5, "#D946EF");
-          arcGrad.addColorStop(1, pair.c2);
-
           const midX = (n1.screenX + n2.screenX) / 2;
           const midY = (n1.screenY + n2.screenY) / 2 - 34;
 
           ctx.beginPath();
           ctx.moveTo(n1.screenX, n1.screenY);
           ctx.quadraticCurveTo(midX, midY, n2.screenX, n2.screenY);
-          ctx.strokeStyle = arcGrad;
-          ctx.lineWidth = 2.4;
-          ctx.shadowColor = pair.c1;
-          ctx.shadowBlur = 14;
+          ctx.strokeStyle = pair.c1;
+          ctx.lineWidth = 1.8;
           ctx.stroke();
-          ctx.shadowBlur = 0;
 
           const t = (rotation * 2.5 + idx * 0.22) % 1;
           const px = (1 - t) * (1 - t) * n1.screenX + 2 * (1 - t) * t * midX + t * t * n2.screenX;
           const py = (1 - t) * (1 - t) * n1.screenY + 2 * (1 - t) * t * midY + t * t * n2.screenY;
 
           ctx.beginPath();
-          ctx.arc(px, py, 3.8, 0, Math.PI * 2);
+          ctx.arc(px, py, 3, 0, Math.PI * 2);
           ctx.fillStyle = "#FFFFFF";
-          ctx.shadowColor = pair.c2;
-          ctx.shadowBlur = 12;
           ctx.fill();
-          ctx.shadowBlur = 0;
         }
       });
 
       projectedNodes.forEach((node) => {
         if (node.visible) {
           ctx.beginPath();
-          ctx.arc(node.screenX, node.screenY, 7 * node.scale, 0, Math.PI * 2);
+          ctx.arc(node.screenX, node.screenY, 5 * node.scale, 0, Math.PI * 2);
           ctx.fillStyle = node.color;
-          ctx.shadowColor = node.color;
-          ctx.shadowBlur = 16;
           ctx.fill();
-
-          const pulseR = (11 + Math.sin(rotation * 8) * 3) * node.scale;
-          ctx.beginPath();
-          ctx.arc(node.screenX, node.screenY, pulseR, 0, Math.PI * 2);
-          ctx.strokeStyle = node.glow;
-          ctx.lineWidth = 1.6;
-          ctx.stroke();
-          ctx.shadowBlur = 0;
 
           ctx.fillStyle = "rgba(3, 7, 18, 0.85)";
           ctx.fillRect(node.screenX + 10, node.screenY - 14, 94, 18);
@@ -265,65 +257,45 @@ export default function Home() {
           ctx.fillText(`${node.label} (${node.ping}ms)`, node.screenX + 13, node.screenY - 2);
         }
       });
-
-      rotation += 0.005;
-      animationFrameId = requestAnimationFrame(render);
     };
 
     render();
 
+    const timer = setTimeout(() => {
+      let lastTime = 0;
+      const fpsInterval = 1000 / 30;
+
+      const loop = (currentTime) => {
+        if (!isVisible) return;
+        animationFrameId = requestAnimationFrame(loop);
+        const elapsed = currentTime - lastTime;
+        if (elapsed < fpsInterval) return;
+        lastTime = currentTime - (elapsed % fpsInterval);
+
+        rotation += 0.005;
+        render();
+      };
+      animationFrameId = requestAnimationFrame(loop);
+    }, 1000);
+
+    let observer;
+    if ("IntersectionObserver" in window) {
+      observer = new IntersectionObserver(
+        ([entry]) => {
+          isVisible = entry.isIntersecting;
+        },
+        { threshold: 0.1 }
+      );
+      observer.observe(canvas);
+    }
+
     return () => {
+      clearTimeout(timer);
       cancelAnimationFrame(animationFrameId);
       window.removeEventListener("resize", resizeCanvas);
+      if (observer) observer.disconnect();
     };
   }, []);
-
-  const bodyPartsData = {
-    head: {
-      name: "Cranial & Neuro System",
-      status: "Optimal Function",
-      statusColor: "text-emerald-400 bg-emerald-950/80 border-emerald-500/50",
-      temp: "36.6 °C",
-      risk: "Low Risk (8%)",
-      symptoms: "Mild screen fatigue, normal cognitive alertness.",
-      prognosis: "Healthy EEG frequencies detected. Hydration and 15-min rest advised.",
-    },
-    chest: {
-      name: "Cardiothoracic Matrix",
-      status: "Active Tele-Monitoring",
-      statusColor: "text-amber-400 bg-amber-950/80 border-amber-500/50",
-      temp: "37.0 °C",
-      risk: "Moderate Risk (28%)",
-      symptoms: "Elevated resting pulse after exertion; stable ST segment on 12-lead telemetry.",
-      prognosis: "Sinus rhythm verified. Proactive lipid profile screening scheduled.",
-    },
-    abdomen: {
-      name: "Metabolic & Gastrointestinal",
-      status: "Stable Baseline",
-      statusColor: "text-cyan-400 bg-cyan-950/80 border-cyan-500/50",
-      temp: "36.8 °C",
-      risk: "Normal (14%)",
-      symptoms: "Normal glycemic indices, fasting glucose 94 mg/dL.",
-      prognosis: "Optimal gut microbiome metabolic activity. Maintain daily dietary fiber.",
-    },
-    joints: {
-      name: "Musculoskeletal & Locomotor",
-      status: "Optimal Mobility",
-      statusColor: "text-emerald-400 bg-emerald-950/80 border-emerald-500/50",
-      temp: "36.4 °C",
-      risk: "Low Risk (11%)",
-      symptoms: "Normal range of motion across spinal, knee, and shoulder joints.",
-      prognosis: "Daily step goal 8,240 achieved. Joint inflammation biomarkers absent.",
-    },
-  };
-
-  const genomicRisks = [
-    { name: "Cardiovascular Susceptibility", value: 24, level: "Low", color: "from-cyan-500 to-teal-400" },
-    { name: "Type-2 Diabetes Marker", value: 42, level: "Moderate", color: "from-amber-400 to-orange-500" },
-    { name: "Hypertension Disposition", value: 18, level: "Low", color: "from-emerald-400 to-teal-500" },
-    { name: "CYP2D6 Drug Metabolism Rate", value: 88, level: "Extensive (Rapid)", color: "from-blue-500 to-indigo-600" },
-    { name: "Autoimmune Reactivity", value: 12, level: "Minimal", color: "from-fuchsia-400 to-pink-500" },
-  ];
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] text-slate-900 selection:bg-teal-500 selection:text-white font-sans flex flex-col relative overflow-x-hidden">
@@ -595,12 +567,12 @@ export default function Home() {
                   <div className="p-4 rounded-2xl bg-gradient-to-br from-slate-950 via-[#0A1A33] to-[#040D1D] text-white border border-fuchsia-500/30 shadow-[0_0_20px_rgba(217,70,239,0.15)] space-y-3">
                     <div className="flex items-center justify-between">
                       <span className="font-extrabold text-sm text-cyan-300 drop-shadow-[0_0_8px_rgba(6,182,212,0.6)]">
-                        {bodyPartsData[selectedBodyPart].name}
+                        {BODY_PARTS_DATA[selectedBodyPart].name}
                       </span>
                       <span
-                        className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${bodyPartsData[selectedBodyPart].statusColor}`}
+                        className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${BODY_PARTS_DATA[selectedBodyPart].statusColor}`}
                       >
-                        {bodyPartsData[selectedBodyPart].status}
+                        {BODY_PARTS_DATA[selectedBodyPart].status}
                       </span>
                     </div>
 
@@ -610,7 +582,7 @@ export default function Home() {
                           THERMAL INDEX
                         </span>
                         <span className="text-sm font-bold text-white">
-                          {bodyPartsData[selectedBodyPart].temp}
+                          {BODY_PARTS_DATA[selectedBodyPart].temp}
                         </span>
                       </div>
                       <div className="bg-white/10 backdrop-blur-md p-2.5 rounded-xl border border-white/15">
@@ -618,17 +590,17 @@ export default function Home() {
                           CALCULATED RISK
                         </span>
                         <span className="text-sm font-bold text-white">
-                          {bodyPartsData[selectedBodyPart].risk}
+                          {BODY_PARTS_DATA[selectedBodyPart].risk}
                         </span>
                       </div>
                     </div>
 
                     <div className="text-xs space-y-1.5 pt-1 border-t border-white/15">
                       <p className="text-slate-300 font-medium">
-                        <strong className="text-cyan-400">Telemetry:</strong> {bodyPartsData[selectedBodyPart].symptoms}
+                        <strong className="text-cyan-400">Telemetry:</strong> {BODY_PARTS_DATA[selectedBodyPart].symptoms}
                       </p>
                       <p className="text-slate-300 font-medium">
-                        <strong className="text-fuchsia-400">Prognosis:</strong> {bodyPartsData[selectedBodyPart].prognosis}
+                        <strong className="text-fuchsia-400">Prognosis:</strong> {BODY_PARTS_DATA[selectedBodyPart].prognosis}
                       </p>
                     </div>
                   </div>
@@ -653,7 +625,7 @@ export default function Home() {
                   </div>
 
                   <div className="space-y-2 bg-slate-50 p-3.5 rounded-2xl border border-slate-200/80">
-                    {genomicRisks.map((risk, i) => (
+                    {GENOMIC_RISKS.map((risk, i) => (
                       <div key={i} className="space-y-1">
                         <div className="flex items-center justify-between text-[11px]">
                           <span className="font-semibold text-slate-800">{risk.name}</span>
@@ -737,6 +709,10 @@ export default function Home() {
                       <img
                         src="https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=150"
                         alt="Dr. Ananya Sharma"
+                        loading="lazy"
+                        decoding="async"
+                        width="40"
+                        height="40"
                         className="w-10 h-10 rounded-xl object-cover ring-2 ring-teal-400 shadow-[0_0_8px_rgba(20,184,166,0.3)]"
                       />
                       <div>
@@ -754,6 +730,10 @@ export default function Home() {
                       <img
                         src="https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&q=80&w=150"
                         alt="Dr. Rajesh Kulkarni"
+                        loading="lazy"
+                        decoding="async"
+                        width="40"
+                        height="40"
                         className="w-10 h-10 rounded-xl object-cover ring-2 ring-blue-400 shadow-[0_0_8px_rgba(59,130,246,0.3)]"
                       />
                       <div>
@@ -803,6 +783,10 @@ export default function Home() {
                     <img
                       src="https://images.unsplash.com/photo-1594824813583-0574744ebc40?auto=format&fit=crop&q=80&w=150"
                       alt="Dr. Sarah Jenkins"
+                      loading="lazy"
+                      decoding="async"
+                      width="48"
+                      height="48"
                       className="w-12 h-12 rounded-2xl object-cover ring-2 ring-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.3)]"
                     />
                     <div>

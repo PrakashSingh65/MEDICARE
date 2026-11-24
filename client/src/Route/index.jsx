@@ -1,41 +1,46 @@
+import React, { lazy } from "react";
 import { createBrowserRouter } from "react-router-dom";
 import App from "../App";
 import Home from "../Page/Home";
-import Login from "../Page/Login";
-import Signup from "../Page/Signup";
-import Contact from "../Page/Contact";
-import ForgotPassword from "../Page/ForgotPassword";
-import VerifyContact from "../Page/VerifyContact";
-
-import AdminDashboard from "../Page/Admin/AdminDashboard";
-import DoctorManagement from "../Page/Admin/DoctorManagement";
-import PatientManagement from "../Page/Admin/PatientManagement";
-import AppointmentManagement from "../Page/Admin/AppointmentManagement";
-import PaymentManagement from "../Page/Admin/PaymentManagement";
-import ContentManagement from "../Page/Admin/ContentManagement";
-import SystemManagement from "../Page/Admin/SystemManagement";
-import MedicineList from "../Page/Admin/MedicineList";
-import RevenueGrowth from "../Page/Admin/RevenueGrowth";
-
-import DoctorDashboard from "../Page/Doctor/DoctorDashboard";
-import DoctorProfile from "../Page/Doctor/DoctorProfile";
-import DoctorSchedule from "../Page/Doctor/DoctorSchedule";
-import DoctorAppointments from "../Page/Doctor/DoctorAppointments";
-import DoctorPatients from "../Page/Doctor/DoctorPatients";
-import DoctorConsultation from "../Page/Doctor/DoctorConsultation";
-import DoctorPrescription from "../Page/Doctor/DoctorPrescription";
-import DoctorReports from "../Page/Doctor/DoctorReports";
-
-import PatientDashboard from "../Page/Patient/PatientDashboard";
-import PatientProfile from "../Page/Patient/PatientProfile";
-import PatientAppointments from "../Page/Patient/PatientAppointments";
-import PatientPrescriptions from "../Page/Patient/PatientPrescriptions";
-import PatientMedicalHistory from "../Page/Patient/PatientMedicalHistory";
-import PatientConsultation from "../Page/Patient/PatientConsultation";
-import PatientPayments from "../Page/Patient/PatientPayments";
-import PatientNotifications from "../Page/Patient/PatientNotifications";
-
 import ProtectedRoute from "../components/ProtectedRoute";
+
+// Public pages - lazy loaded (secondary routes)
+const Login = lazy(() => import("../Page/Login"));
+const Signup = lazy(() => import("../Page/Signup"));
+const Contact = lazy(() => import("../Page/Contact"));
+const ForgotPassword = lazy(() => import("../Page/ForgotPassword"));
+const VerifyContact = lazy(() => import("../Page/VerifyContact"));
+
+// Admin pages - lazy loaded
+const AdminDashboard = lazy(() => import("../Page/Admin/AdminDashboard"));
+const DoctorManagement = lazy(() => import("../Page/Admin/DoctorManagement"));
+const PatientManagement = lazy(() => import("../Page/Admin/PatientManagement"));
+const AppointmentManagement = lazy(() => import("../Page/Admin/AppointmentManagement"));
+const PaymentManagement = lazy(() => import("../Page/Admin/PaymentManagement"));
+const ContentManagement = lazy(() => import("../Page/Admin/ContentManagement"));
+const SystemManagement = lazy(() => import("../Page/Admin/SystemManagement"));
+const MedicineList = lazy(() => import("../Page/Admin/MedicineList"));
+const RevenueGrowth = lazy(() => import("../Page/Admin/RevenueGrowth"));
+
+// Doctor pages - lazy loaded
+const DoctorDashboard = lazy(() => import("../Page/Doctor/DoctorDashboard"));
+const DoctorProfile = lazy(() => import("../Page/Doctor/DoctorProfile"));
+const DoctorSchedule = lazy(() => import("../Page/Doctor/DoctorSchedule"));
+const DoctorAppointments = lazy(() => import("../Page/Doctor/DoctorAppointments"));
+const DoctorPatients = lazy(() => import("../Page/Doctor/DoctorPatients"));
+const DoctorConsultation = lazy(() => import("../Page/Doctor/DoctorConsultation"));
+const DoctorPrescription = lazy(() => import("../Page/Doctor/DoctorPrescription"));
+const DoctorReports = lazy(() => import("../Page/Doctor/DoctorReports"));
+
+// Patient pages - lazy loaded
+const PatientDashboard = lazy(() => import("../Page/Patient/PatientDashboard"));
+const PatientProfile = lazy(() => import("../Page/Patient/PatientProfile"));
+const PatientAppointments = lazy(() => import("../Page/Patient/PatientAppointments"));
+const PatientPrescriptions = lazy(() => import("../Page/Patient/PatientPrescriptions"));
+const PatientMedicalHistory = lazy(() => import("../Page/Patient/PatientMedicalHistory"));
+const PatientConsultation = lazy(() => import("../Page/Patient/PatientConsultation"));
+const PatientPayments = lazy(() => import("../Page/Patient/PatientPayments"));
+const PatientNotifications = lazy(() => import("../Page/Patient/PatientNotifications"));
 
 export const router = createBrowserRouter([
   {
@@ -67,6 +72,7 @@ export const router = createBrowserRouter([
         element: <VerifyContact />,
       },
 
+      // Admin routes
       {
         path: "admin",
         element: (
@@ -148,6 +154,7 @@ export const router = createBrowserRouter([
         ),
       },
 
+      // Doctor routes
       {
         path: "doctor",
         element: (
@@ -213,6 +220,7 @@ export const router = createBrowserRouter([
         ),
       },
 
+      // Patient routes
       {
         path: "patient",
         element: (
