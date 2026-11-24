@@ -121,17 +121,24 @@ export default function Home() {
   const canvasRef = useRef(null);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setActiveConsultationsCount((prev) => {
-        const delta = Math.floor(Math.random() * 5) - 2;
-        return Math.max(230, Math.min(270, prev + delta));
-      });
-      setBpmValue((prev) => {
-        const delta = Math.floor(Math.random() * 3) - 1;
-        return Math.max(71, Math.min(78, prev + delta));
-      });
+    let interval;
+    const timeout = setTimeout(() => {
+      interval = setInterval(() => {
+        setActiveConsultationsCount((prev) => {
+          const delta = Math.floor(Math.random() * 5) - 2;
+          return Math.max(230, Math.min(270, prev + delta));
+        });
+        setBpmValue((prev) => {
+          const delta = Math.floor(Math.random() * 3) - 1;
+          return Math.max(71, Math.min(78, prev + delta));
+        });
+      }, 4000);
     }, 3000);
-    return () => clearInterval(interval);
+
+    return () => {
+      clearTimeout(timeout);
+      if (interval) clearInterval(interval);
+    };
   }, []);
 
   useEffect(() => {
@@ -162,8 +169,8 @@ export default function Home() {
     let isVisible = true;
 
     const resizeCanvas = () => {
-      canvas.width = canvas.parentElement.clientWidth || 450;
-      canvas.height = 380;
+      canvas.width = canvas.parentElement?.clientWidth || 450;
+      canvas.height = 320;
     };
     resizeCanvas();
     window.addEventListener("resize", resizeCanvas);
@@ -263,20 +270,23 @@ export default function Home() {
 
     const timer = setTimeout(() => {
       let lastTime = 0;
-      const fpsInterval = 1000 / 30;
+      const fpsInterval = 1000 / 20;
 
       const loop = (currentTime) => {
-        if (!isVisible) return;
+        if (!isVisible || document.hidden) {
+          animationFrameId = requestAnimationFrame(loop);
+          return;
+        }
         animationFrameId = requestAnimationFrame(loop);
         const elapsed = currentTime - lastTime;
         if (elapsed < fpsInterval) return;
         lastTime = currentTime - (elapsed % fpsInterval);
 
-        rotation += 0.005;
+        rotation += 0.004;
         render();
       };
       animationFrameId = requestAnimationFrame(loop);
-    }, 1000);
+    }, 3500);
 
     let observer;
     if ("IntersectionObserver" in window) {
@@ -307,7 +317,7 @@ export default function Home() {
             <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-cyan-500/20 via-fuchsia-500/15 to-transparent rounded-full blur-3xl pointer-events-none"></div>
             <div className="absolute bottom-0 left-0 w-80 h-80 bg-gradient-to-tr from-teal-500/20 via-blue-600/15 to-transparent rounded-full blur-3xl pointer-events-none"></div>
             
-            <div className="flex flex-wrap items-center justify-between gap-3 relative z-10 mb-2">
+            <div className="flex flex-wrap items-center justify-between gap-3 relative z-10 mb-4">
               <div className="flex flex-wrap items-center gap-2">
                 <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-cyan-950/80 border border-cyan-400/50 text-cyan-300 text-xs font-bold shadow-[0_0_15px_rgba(6,182,212,0.3)]">
                   <Sparkles className="w-3.5 h-3.5 text-cyan-400 animate-spin" style={{ animationDuration: '8s' }} />
@@ -326,15 +336,7 @@ export default function Home() {
               </span>
             </div>
 
-            <div className="relative w-full h-[380px] flex items-center justify-center my-1 z-10">
-              <canvas ref={canvasRef} className="w-full h-full cursor-grab active:cursor-grabbing" />
-              <div className="absolute bottom-2 left-2 bg-slate-950/80 backdrop-blur-md px-3.5 py-1.5 rounded-xl border border-cyan-500/40 text-[11px] font-semibold text-cyan-300 shadow-[0_0_15px_rgba(6,182,212,0.25)] flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_8px_#06B6D4] animate-pulse"></span>
-                <span>Luminous 3D Tele-Grid • Iridescent Neural Arcs</span>
-              </div>
-            </div>
-
-            <div className="space-y-4 pt-6 border-t border-slate-800/80 relative z-10">
+            <div className="space-y-4 mb-5 relative z-10">
               <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-[1.15] bg-gradient-to-r from-white via-cyan-100 to-teal-200 bg-clip-text text-transparent drop-shadow-[0_0_18px_rgba(6,182,212,0.25)]">
                 Intelligent Healthcare, Engineered for Humans.
               </h1>
@@ -352,6 +354,14 @@ export default function Home() {
               <p className="text-sm text-slate-300 leading-relaxed font-normal max-w-2xl">
                 A unified, data-dense operating framework providing synchronized clinical triage, real-time hemodynamic telemetry, and instant diagnostic continuity between patients and world-class specialists.
               </p>
+            </div>
+
+            <div className="relative w-full h-[320px] flex items-center justify-center my-1 z-10">
+              <canvas ref={canvasRef} width={450} height={320} className="w-full h-full cursor-grab active:cursor-grabbing block" />
+              <div className="absolute bottom-2 left-2 bg-slate-950/80 backdrop-blur-md px-3.5 py-1.5 rounded-xl border border-cyan-500/40 text-[11px] font-semibold text-cyan-300 shadow-[0_0_15px_rgba(6,182,212,0.25)] flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_8px_#06B6D4] animate-pulse"></span>
+                <span>Luminous 3D Tele-Grid • Iridescent Neural Arcs</span>
+              </div>
             </div>
           </div>
 
@@ -417,7 +427,7 @@ export default function Home() {
                   <div className="bg-[#020817] rounded-2xl p-4 text-white relative overflow-hidden border border-cyan-500/30 shadow-[0_0_25px_rgba(6,182,212,0.15)]">
                     <div className="flex items-center justify-between text-xs mb-2">
                       <div className="flex items-center gap-2">
-                        <Heart className="w-4 h-4 text-rose-500 animate-ping" />
+                        <Heart className="w-4 h-4 text-rose-500 animate-pulse" />
                         <span className="font-extrabold text-cyan-300 font-mono tracking-wider drop-shadow-[0_0_6px_rgba(6,182,212,0.7)]">
                           LEAD II EKG WAVEFORM
                         </span>

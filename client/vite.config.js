@@ -33,17 +33,23 @@ export default defineConfig({
       output: {
         manualChunks(id) {
           if (id.includes('node_modules')) {
-            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router-dom')) {
-              return 'vendor-react';
-            }
-            if (id.includes('@reduxjs/toolkit') || id.includes('react-redux')) {
-              return 'vendor-redux';
-            }
-            if (id.includes('@tanstack/react-query') || id.includes('axios')) {
-              return 'vendor-query';
-            }
             if (id.includes('lucide-react')) {
               return 'vendor-icons';
+            }
+            if (id.includes('@tanstack') || id.includes('axios')) {
+              return 'vendor-query';
+            }
+            if (id.includes('@reduxjs') || id.includes('react-redux')) {
+              return 'vendor-redux';
+            }
+            if (id.includes('react-router')) {
+              return 'vendor-router';
+            }
+            if (id.includes('react-dom')) {
+              return 'vendor-react-dom';
+            }
+            if (id.includes('/react/') || id.includes('\\react\\')) {
+              return 'vendor-react-core';
             }
           }
         },
